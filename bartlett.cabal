@@ -2,7 +2,7 @@ name:                bartlett
 version:             0.9.0
 synopsis:            The Jenkins command-line tool to serve your needs.
 description:         Please see README.md
-homepage:            https://bitbucket.nike.com/users/ffreir/repos/bartlett/browse
+homepage:            https://github.com/Nike-inc/bartlett
 license:             BSD3
 license-file:        LICENSE
 author:              Fernando Freire
