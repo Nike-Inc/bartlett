@@ -15,6 +15,7 @@ module Bartlett.Util (
   -- $urlHelpers
   mkUrl,
   mkJobPath,
+  withForcedSSL,
   segmentPath,
   pairToTuple,
   -- * Type Conversions
@@ -29,7 +30,7 @@ module Bartlett.Util (
   optionsBuilder
 )where
 
-import Prelude hiding (concat, null)
+import Prelude hiding (concat, null, dropWhile)
 
 import Bartlett.Types
 
@@ -37,7 +38,6 @@ import Control.Lens (set)
 import Data.Aeson (decode, Object)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy.Char8
-  (ByteString, split, toStrict, null, intercalate, append, concat, unpack, fromStrict)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Network.Wreq as W
@@ -55,6 +55,13 @@ mkJobPath :: ByteString -> ByteString
 mkJobPath ""  = ""
 mkJobPath "/" = ""
 mkJobPath s   = append "/job/" . intercalate "/job/" . segmentPath $ s
+
+-- | Given a base Jenkins instance, force the use of HTTPS
+withForcedSSL :: JenkinsInstance -> JenkinsInstance
+withForcedSSL base =
+  if "http://" `isPrefixOf` base || "https://" `isPrefixOf` base
+     then concat ["https", dropWhile (/=':') base]
+     else concat ["https://", base]
 
 -- | Segment a slash-delimited string as well as filter empty elements.
 segmentPath :: ByteString -> [ByteString]

@@ -12,7 +12,6 @@ module Bartlett.Configuration where
 
 import Prelude hiding (concat)
 
-import Bartlett.Types
 import Bartlett.Util (toText)
 
 import Data.ByteString.Lazy.Char8
