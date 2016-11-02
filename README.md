@@ -267,32 +267,6 @@ It's too manual, but the gist is:
   4. Grab the URL from the properties for that tarball and then update the
   associated recipe in the Homebrew tap
 
-### Roadmap
-
-The following is a rough roadmap off the top of my head:
-
-  - v0.9.1
-      - Attempt to resolve via SSL before attempting regular HTTP
-      - Add documentation around URL protocols
-  - v0.9.2
-      - mock wreq for testing pruposes
-  - v1.0.0
-      - Doc gen/hosting, deployment pipelines, static bin install
-  - v1.1.0
-      - Download artifacts for a given job by id (or regex?)
-  - v1.2.0
-      - Stream console output for given job to STDOUT
-  - v1.3.0
-      - Securely caching user credentials for repeated bartlett invocations
-  - v1.4.0
-      - Support depth and tree opts on get requests
-
-#### Infrastructure Roadmap
-
-  - QMA Integration for Hspec
-  - Static binary build via Jenkins
-  - Automated release to bin storage (S3?)
-
 ##### What's in a name?
 
 [Leslie Bartlett][bartlett-wiki] was a famous butler who founded the London
