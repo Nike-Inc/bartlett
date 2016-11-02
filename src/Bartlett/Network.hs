@@ -26,7 +26,12 @@ import qualified Network.HTTP.Client as NHC
 import System.Exit (die)
 import Network.Wreq (Options, Response, customMethodWith)
 
-execRequest :: ByteString -> Options -> ByteString -> IO (Response ByteString)
+-- | General request handler that provides basic error handling.
+execRequest ::
+  ByteString                  -- ^ The type of request to make (e.g. "get")
+  -> Options                  -- ^ Request params to pass along with the request.
+  -> ByteString               -- ^ The uri to make the request to
+  -> IO (Response ByteString)
 execRequest requestType opts reqUrl =
   case requestType of
     "post" ->
