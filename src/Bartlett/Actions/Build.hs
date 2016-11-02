@@ -14,15 +14,14 @@ module Bartlett.Actions.Build (
 
 import Prelude hiding (putStrLn)
 
-import Bartlett.Network (simpleErrorHandler)
+import Bartlett.Network (execRequest)
 import Bartlett.Types
 import qualified Bartlett.Util as BU
 
-import qualified Control.Exception as E
 import Control.Lens ((?~), (^.), (&))
 import Data.Aeson.Encode.Pretty (encodePretty)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.Wreq (Options, postWith, responseStatus, auth)
+import Network.Wreq (Options, responseStatus, auth)
 
 
 -- | Parses and determines type of job to trigger based on supplied parameters.
@@ -41,10 +40,9 @@ postBuild ::
   -> Maybe JobParameters -- ^ Optional set of job parameters to trigger with.
   -> IO ()
 postBuild user base path parameters = do
-  resp <- postWith reqOpts  reqUri ("" :: BL.ByteString)
-            `E.catch` simpleErrorHandler
+  resp <- execRequest "post" reqOpts reqUri
   BL.putStrLn . encodePretty . BU.toResponseStatus $
     resp ^. responseStatus
   where (suffix, buildOpts) = consBuildType parameters
         reqOpts = buildOpts & auth ?~ getBasicAuth user
-        reqUri = BL.unpack (BU.mkUrl base path suffix)
+        reqUri = BU.mkUrl base path suffix

@@ -34,6 +34,15 @@ spec =
       it "should not return a string ending with '/job/'" $
         unpack (mkJobPath "/foo/bar") `shouldEndWith` "bar"
 
+    describe "withForcedSSL" $ do
+      it "should return a uri with the https protocol" $
+        unpack (withForcedSSL "lol") `shouldStartWith` "https://"
+      it "should return a uri with the https protocol when http is provided" $
+        withForcedSSL "http://foo" `shouldBe` "https://foo"
+      it "should return a uri with the https protocol when https is provided" $ do
+        let url = "https://foo"
+        withForcedSSL url `shouldBe` url
+
     describe "segmentPath" $ do
       it "should return an empty collection if nothing is passed in" $
         segmentPath "" `shouldBe` []
