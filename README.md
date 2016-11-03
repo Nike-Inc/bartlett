@@ -79,6 +79,13 @@ issue as possible.
 
 ## Usage
 
+##### A note about protocols
+
+Bartlett will honor any protocol explicitly passed on the command line or via
+configuration. However, if no protocol is provided then Bartlett will attempt
+to contact your Jenkins instance via HTTPS. It is _strongly_ recommended that
+you talk to your Jenkins instance via HTTPS if possible.
+
 ### Getting Help at the Command Line
 
 You can get a list of available options with the `-h` flag:
@@ -267,7 +274,7 @@ It's too manual, but the gist is:
   4. Grab the URL from the properties for that tarball and then update the
   associated recipe in the Homebrew tap
 
-##### What's in a name?
+### What's in a name?
 
 [Leslie Bartlett][bartlett-wiki] was a famous butler who founded the London
 School of British Butlers.
