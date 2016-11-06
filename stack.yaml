@@ -37,6 +37,8 @@ resolver: lts-7.3
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
+- 'https://github.com/dogonthehorizon/haskell-keyring/archive/0.1.0.5.tar.gz'
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: []
