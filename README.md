@@ -150,6 +150,10 @@ Enter password:
 "barjob-two"
 ```
 
+You may find after a while that entering your password for each invocation
+becomes tedious. For your convenience, Bartlett can cache user passwords on a
+per profile basis. See the "Configuring Profiles" section for more information.
+
 ### Triggering Job Builds
 
 You can build parameterized and normal jobs by using the `build` sub-command.
@@ -194,9 +198,7 @@ block.
 ```
 # The default profile
 default {
-  # Where should Bartlett route its requests?
   jenkins_instance = "https://my.jenkins-instance.com"
-  # What username should be used to authenticate requests?
   username = "my_user"
 }
 
@@ -216,6 +218,22 @@ bartlett --profile dank_profile info /  # Source a different profile
 
 If a value is provided on the command line _AND_ configured in a profile, then
 the value provided on the command line will take precedence.
+
+#### Supported Configuration Values
+
+The following values are supported by the latest version of Bartlett:
+
+| Value | Default | Description|
+|-------|---------|------------|
+| `username` | None | The username to authenticate against Jenkins with. |
+| `jenkins_instance` | None | The Jenkins instance to interact with. |
+| `store_password` | false | If true, securely store the user's password on next invocation. |
+
+##### A note on password storage
+
+Bartlett will attempt to store user credentials using OSX's Keychain service.
+By default, passwords **are not** stored and must explictly enable storage
+using the above configuration options _for each profile_.
 
 ## Development
 
