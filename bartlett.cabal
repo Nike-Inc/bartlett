@@ -47,6 +47,9 @@ executable bartlett
   main-is:             app/Main.hs
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
+  ld-options:
+    -optl-static
+    -optl-pthread
   ghc-options:
     -threaded
     -rtsopts

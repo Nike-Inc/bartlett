@@ -37,11 +37,15 @@ resolver: lts-7.3
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
-- 'https://github.com/dogonthehorizon/haskell-keyring/archive/0.1.0.5.tar.gz'
+- location:
+      git: git@github.com:dogonthehorizon/haskell-keyring
+      commit: ce751c51cc1463463d434c5b612078a689b54723
+  extra-dep: true
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+  - keyring-0.1.0.5
 
 # Override default flag values for local packages and extra-deps
 flags: {}
