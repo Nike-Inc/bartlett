@@ -8,11 +8,20 @@ Stability   : stable
 
 Configuration management for Bartlett.
 -}
-module Bartlett.Configuration where
+module Bartlett.Configuration (
+  -- * Configuration Management
+  defaultConfigLoc,
+  getConfiguration,
+  -- * Convenience Accessors
+  getUsername,
+  getJenkinsInstance,
+  getStorePassword
+) where
 
 import Prelude hiding (concat)
 
 import Bartlett.Util (toText)
+import Bartlett.Types
 
 import Data.ByteString.Lazy.Char8
 import qualified Data.Configurator as C
@@ -26,15 +35,22 @@ defaultConfigLoc = "$(HOME)" </> ".bartlett.cfg"
 -- | Attempt to retrieve the default configuration.
 --
 --   Returns an empty configuration if it could not load the default.
-getConfiguration :: IO Config
-getConfiguration = C.load [Optional defaultConfigLoc]
+getConfiguration :: Profile -> IO Config
+getConfiguration profile =
+  C.subconfig (toText profile) <$> C.load [Optional defaultConfigLoc]
 
--- | Retrieve the value from the provided profile and configuration source.
-getValueFromConfiguration ::
-  ByteString               -- ^ The profile to retrieve values from.
-  -> ByteString            -- ^ The value to retrieve from the given profile.
-  -> Config                -- ^ The configuration source to retrieve values from.
-  -> IO (Maybe ByteString) -- ^ Just the value if it was found, Nothing otherwise.
-getValueFromConfiguration profile fieldName cfg =
-  C.lookup cfg qualifiedFieldName :: IO (Maybe ByteString)
-    where qualifiedFieldName = toText (concat [profile, ".", fieldName])
+-- | Retrieve the username for the given profile.
+getUsername :: Config -> IO (Maybe Username)
+getUsername cfg =
+  C.lookup cfg (toText "username")
+
+-- | Retrieve the Jenkins instance for the given profile.
+getJenkinsInstance :: Config -> IO (Maybe JenkinsInstance)
+getJenkinsInstance cfg =
+  C.lookup cfg (toText "jenkins_instance")
+
+-- | Get the value determining whether the user's password should be stored.
+getStorePassword :: Config -> IO (Maybe Bool)
+getStorePassword cfg =
+  C.lookup cfg (toText "store_password")
+

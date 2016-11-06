@@ -3,8 +3,7 @@ module Main where
 import Prelude hiding (putStr)
 
 import Bartlett.Types
-import Bartlett.Configuration
-  (getConfiguration, getValueFromConfiguration)
+import qualified Bartlett.Configuration as C
 import qualified Bartlett.Actions.Info as AI
 import qualified Bartlett.Actions.Build as AB
 import qualified Bartlett.Parsers as P
@@ -15,6 +14,7 @@ import Data.Maybe (fromMaybe)
 import Data.Monoid
 import Options.Applicative
 import System.IO hiding (putStr, hPutStrLn, hPutStr)
+import qualified System.Keyring as SK
 
 -- | Wrapper determining if the given action should be echoed to stdout.
 withEcho :: Bool -> IO a -> IO a
@@ -39,37 +39,65 @@ requestPassword = do
 chooseValue :: [Maybe a] -> Maybe a
 chooseValue = getFirst . foldl mappend (First Nothing) . fmap First
 
+-- | Construct a namespaced service name for the OSX Keychain service.
+keychainService :: Profile -> String
+keychainService = unpack . mappend "bartlett."
+
+-- | Given a username and profile retrieve the user's password.
+--
+-- Optionally store the user's password in the OSX Keychain.
+selectPassword :: Bool -> Profile -> Username -> IO Password
+selectPassword shouldStorePassword profile usr = do
+  let service = SK.Service (keychainService profile)
+
+  pwdFromKeyChain <-
+    SK.getPassword service (SK.Username (unpack usr))
+
+  case pwdFromKeyChain of
+    Just (SK.Password pwd) ->
+      return $ pack pwd
+    Nothing -> do
+      pwd <- requestPassword
+      if shouldStorePassword
+         then do
+          SK.setPassword service (SK.Username (unpack usr)) (SK.Password (unpack pwd))
+          return pwd
+      else
+        return pwd
+
+
 -- | Execute the given command with the given username and jenkins instance.
-executeCommand :: Command -> Username -> JenkinsInstance -> IO ()
-executeCommand cmd usr jenkinsInstance = do
-  pwd <- requestPassword
+executeCommand :: Command -> User -> JenkinsInstance -> IO ()
+executeCommand cmd usr jenkinsInstance =
   case cmd of
     Info jobPaths ->
-      AI.getInfo (User usr pwd) jenkinsInstance jobPaths
+      AI.getInfo usr jenkinsInstance jobPaths
     Build jobPath jobParameters ->
-      AB.postBuild (User usr pwd) jenkinsInstance jobPath jobParameters
+      AB.postBuild usr jenkinsInstance jobPath jobParameters
 
 -- | Execute the appropriate sub-command given parsed cli options.
 run :: Options -> IO ()
 run (Options username jenkinsInstance profile cmd) = do
   let profileName = fromMaybe "default" profile
-  cfg <- getConfiguration
+  cfg <- C.getConfiguration profileName
 
   -- TODO this is all very messy, surely there should be some way
   --      to simplify it.
 
-  cfgJenkins <- getValueFromConfiguration profileName "jenkins_instance" cfg
+  cfgJenkins <- C.getJenkinsInstance cfg
   case chooseValue [jenkinsInstance, cfgJenkins] of
     Nothing ->
       hPutStrLn stderr "Could not determine the Jenkins instance to use."
     Just inst -> do
 
-      cfgUser <- getValueFromConfiguration profileName "username" cfg
+      cfgUser <- C.getUsername cfg
       case chooseValue [username, cfgUser] of
         Nothing ->
           hPutStrLn stderr "Could not determine username to use."
-        Just usr ->
-          executeCommand cmd usr inst
+        Just usr -> do
+          shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
+          pwd <- selectPassword shouldStorePassword profileName usr
+          executeCommand cmd (User usr pwd) inst
 
 main :: IO ()
 main = run =<< execParser (P.parseOptions `P.withInfo` "")

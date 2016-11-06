@@ -54,7 +54,8 @@ executable bartlett
   build-depends:       base >= 4.7 && < 5,
                        bartlett,
                        bytestring,
-                       optparse-applicative
+                       optparse-applicative,
+                       keyring
 
 test-suite bartlett-test
   type:                    exitcode-stdio-1.0
