@@ -23,7 +23,6 @@ import Prelude hiding (concat)
 import Bartlett.Util (toText)
 import Bartlett.Types
 
-import Data.ByteString.Lazy.Char8
 import qualified Data.Configurator as C
 import Data.Configurator.Types
 import System.FilePath ((</>))

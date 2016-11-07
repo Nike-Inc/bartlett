@@ -12,19 +12,16 @@ A collection of utility methods used throughout Bartlett.
 -}
 module Bartlett.Util (
   -- * URL Helpers
-  -- $urlHelpers
   mkUrl,
   mkJobPath,
   withForcedSSL,
   segmentPath,
   pairToTuple,
   -- * Type Conversions
-  -- $typeConversions
   toText,
   toPrettyJson,
   toResponseStatus,
   -- * Query Parameter Helpers
-  -- $queryParameterHelpers
   parseParameters,
   parametersBuilder,
   optionsBuilder
@@ -43,15 +40,12 @@ import qualified Data.Text.Encoding as TE
 import qualified Network.Wreq as W
 import Network.HTTP.Types.Status
 
--- $urlHelpers
--- Helper methods for dealing with URLs.
-
 -- | Constructs a valid Jenkins API url.
 mkUrl :: JenkinsInstance -> JobPath -> ByteString -> ByteString
 mkUrl base path suffix = concat [base, mkJobPath path, suffix]
 
 -- | Given a slash-delimited path, return that same path interspersed with '/job/'.
-mkJobPath :: ByteString -> ByteString
+mkJobPath :: JobPath -> ByteString
 mkJobPath ""  = ""
 mkJobPath "/" = ""
 mkJobPath s   = append "/job/" . intercalate "/job/" . segmentPath $ s
@@ -73,9 +67,6 @@ pairToTuple []     = error "Attempted to convert empty list to a 2-tuple."
 pairToTuple [a, b] = (a, b)
 pairToTuple _      = error "Attempted to convert a list of size != 2 to a 2-tuple."
 
--- $typeConversions
--- Helpers methods for converting between types.
-
 -- | Convert a lazy "ByteString" to "Text".
 toText :: ByteString -> T.Text
 toText = TE.decodeUtf8 . toStrict
@@ -91,10 +82,6 @@ toResponseStatus (Status code msg) =
     statusCode = code,
     statusMessage = (unpack . fromStrict) msg
   }
-
--- $queryParameterHelpers
--- Helpers for parsing query parameters obtained from the command line and
--- converting them to formats that 'Wreq' supports.
 
 -- | Given a comma delimited list of key=value pairs, return a collection
 -- of pairs.
