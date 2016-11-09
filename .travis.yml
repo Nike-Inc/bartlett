@@ -37,10 +37,6 @@ before_install:
 # Using compiler above sets CC to an invalid value, so unset it
 - unset CC
 
-# We want to always allow newer versions of packages when building on GHC HEAD
-- CABALARGS=""
-- if [ "x$GHCVER" = "xhead" ]; then CABALARGS=--allow-newer; fi
-
 # Download and unpack the stack executable
 - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$HOME/.local/bin:/opt/alex/$ALEXVER/bin:/opt/happy/$HAPPYVER/bin:$HOME/.cabal/bin:$PATH
 - mkdir -p ~/.local/bin
@@ -72,12 +68,7 @@ install:
   set -ex
   case "$BUILD" in
     stack)
-      stack --no-terminal --install-ghc $ARGS test --bench --only-dependencies
-      ;;
-    cabal)
-      cabal --version
-      travis_retry cabal update
-      cabal install --only-dependencies --enable-tests --enable-benchmarks --force-reinstalls --ghc-options=-O0 --reorder-goals --max-backjumps=-1 $CABALARGS $PACKAGES
+      stack --no-terminal $ARGS test --bench --only-dependencies
       ;;
   esac
   set +ex
