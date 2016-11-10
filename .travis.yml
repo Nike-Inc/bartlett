@@ -61,7 +61,8 @@ script:
 # on end-user machines. Also strip the binary of debugging symbols to reduce
 # final filesize. Finally, tar it up and ship it!
 before_deploy:
-- export BARTLETT_VERSION=$(grep version bartlett.cabal | head -1 | awk -F: '{ print $2 }' | tr -d '[:space:]')
+- |
+  export BARTLETT_VERSION=$(grep version bartlett.cabal | head -1 | awk -F: '{ print $2 }' | tr -d '[:space:]')
 - stack clean && stack build --copy-bins && strip "${HOME}/.local/bin/bartlett"
   && tar czvf -C "${HOME}/.local/bin/" "bartlett-static-${BARTLETT_VERSION}.tar.gz"
 
