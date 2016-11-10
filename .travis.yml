@@ -6,6 +6,7 @@ language: c
 
 # Caching so the next build will be fast too.
 cache:
+  timeout: 900  # 15 minutes
   directories:
   - $HOME/.stack
   - $HOME/.cabal/packages
