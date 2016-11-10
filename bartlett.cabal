@@ -1,5 +1,5 @@
 name:                bartlett
-version:             0.10.0
+version:             1.0.0
 synopsis:            The Jenkins command-line tool to serve your needs.
 description:         Please see README.md
 homepage:            https://github.com/Nike-inc/bartlett
