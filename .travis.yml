@@ -64,12 +64,12 @@ before_deploy:
 - |
   export BARTLETT_VERSION=$(grep version bartlett.cabal | head -1 | awk -F: '{ print $2 }' | tr -d '[:space:]')
 - stack clean && stack build --copy-bins && strip "${HOME}/.local/bin/bartlett"
-  && tar czvf -C "${HOME}/.local/bin/" "bartlett-static-${BARTLETT_VERSION}.tar.gz"
+  && tar czvf  "bartlett-static-${BARTLETT_VERSION}.tar.gz" -C "${HOME}/.local/bin/" bartlett
 
 deploy:
   provider: releases
   skip_cleanup: true
-  file: "$TRAVIS_BUILD_DIR/bartlett-static-${BARTLETT_VERSION}.tar.gz"
+  file: "bartlett-static-${BARTLETT_VERSION}.tar.gz"
   api_key:
     secure: tdblmxFAMYotnF+1fB8N944bhvtRmFR2AlOYKCp+YCtpJ0mugXhOs6WqZmt8fpR+8+B04cz96k6uHN34iOuF++59ndQwO2KUMei5HyUXq0WOOjsxg6lXghdvZas+4ur7aMOP/6hNCBOWHGeT3+VeDsApgueApcB6aN4JFggeiS4KXyRqDO31WVugI0VKZej2686mPg/0gpL2xE9XgdmfZYHAZFxx/mxM0ByD5WrF+IW6aa6D+kBOJDHv+kriLU9ZY3buRhFHiWdeQGEN1/iBwIIcPlkImtEWSg8G7/CRrzjKsYv7UbgbiliTAgUi+Qpe/SQV+c7IWQIaOfr5hkKRd0lKqtzeC/cNU+8Mvw2xuWTwjKkp4piP7a90WOoeadpKwAYT5bDQnu6xR8mLex5Cz17p6Wx0k+pwerVzpD56YvPL1lj4Ykd5qt++Rc7NVtxEE+EIKQrVbhnKGL7ecxjiEgepeJmTJZT27NJp873BjJN+PUrTR1xuQbmOBJJyzMBo5X32+LCt9coYHmycRF3zECEcTyz4Pf1wAWzFay0rqP/d83dt0xHepYkQFtfbxLWVGwi41XJzfqpsYvLRbXAUKrSAkR3xB3xK7el0TZgMNQwRt0qSpAULtu0t9I5n/YiP7B7QtkmihZ+yyQVv2QfHbiLo4dWGzLGOQo9RQTu016w=
   on:
