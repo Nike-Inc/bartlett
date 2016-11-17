@@ -26,10 +26,10 @@ configUri base path =
 
 -- | Retrieve the XML configuration for the given job.
 getConfig :: BasicAuthUser a =>
-  a
-  -> JenkinsInstance
-  -> JobPath
-  -> IO ()
+  a                  -- The user to authenticate with.
+  -> JenkinsInstance -- The Jenkins instance to interact with.
+  -> JobPath         -- The Job for the given Jenkins instance to interact with.
+  -> IO ()           -- The XML configuration for the given job.
 getConfig user base path = do
   resp <- execRequest "get" reqOpts (configUri base path) Nothing
   BL.putStrLn $ resp ^. responseBody
@@ -37,10 +37,10 @@ getConfig user base path = do
 
 -- | Update the XML configuration for the given job.
 updateConfig :: BasicAuthUser a =>
-  a
-  -> JenkinsInstance
-  -> JobPath
-  -> ConfigPath
+  a                  -- The user to authenticate with.
+  -> JenkinsInstance -- The Jenkins instance to interact with.
+  -> JobPath         -- The Job for the given Jenkins instance to interact with.
+  -> ConfigPath      -- Path to the XML configuration to upload to Jenkins.
   -> IO ()
 updateConfig user base path configPath = do
   configFile <- BL.readFile configPath
