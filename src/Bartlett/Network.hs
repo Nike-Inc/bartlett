@@ -22,28 +22,36 @@ import Bartlett.Util (toResponseStatus, withForcedSSL)
 import qualified Control.Exception as E
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy.Char8 (ByteString, unpack)
+import Data.Maybe (fromMaybe)
 import qualified Network.HTTP.Client as NHC
 import System.Exit (die)
-import Network.Wreq (Options, Response, customMethodWith)
+import Network.Wreq (Options, Response)
+import qualified Network.Wreq.Session as S
 
 -- | General request handler that provides basic error handling.
 execRequest ::
   ByteString                  -- ^ The type of request to make (e.g. "get")
   -> Options                  -- ^ Request params to pass along with the request.
   -> ByteString               -- ^ The uri to make the request to
+  -> Maybe ByteString         -- ^ The file to upload to the Jenkins instance.
   -> IO (Response ByteString)
-execRequest requestType opts reqUrl =
-  case requestType of
-    "post" ->
-      mkRequest "post" reqUrl
-        `E.catch`
-          recoverableErrorHandler (mkRequest "post" $ withForcedSSL reqUrl)
-    "get" ->
-      mkRequest "get" reqUrl
-        `E.catch`
-          recoverableErrorHandler (mkRequest "get" $ withForcedSSL reqUrl)
-
-    where mkRequest method url = customMethodWith method opts (unpack url)
+execRequest requestType opts reqUrl postBody =
+  S.withAPISession $ \session ->
+    case requestType of
+      -- TODO Need to get a CSRF crumb
+      -- JENKINS_URL/crumbIssuer/api/json?xpath=?xpath=concat(//crumbRequestField,":",//crumb)')
+      -- TODO create a proper sum type for requestType
+      "post" ->
+        postSession reqUrl
+          `E.catch`
+            recoverableErrorHandler (postSession $ withForcedSSL reqUrl)
+              where fileToUpload = fromMaybe "" postBody :: ByteString
+                    postSession url = S.postWith opts session (unpack url) fileToUpload
+      "get" ->
+        getSession reqUrl
+          `E.catch`
+            recoverableErrorHandler (getSession $ withForcedSSL reqUrl)
+              where getSession url = S.getWith opts session (unpack url)
 
 
 -- | Handler that returns a JSON representation of the error status.

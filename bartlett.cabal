@@ -1,5 +1,5 @@
 name:                bartlett
-version:             1.0.1
+version:             1.1.0
 synopsis:            The Jenkins command-line tool to serve your needs.
 description:         Please see README.md
 homepage:            https://github.com/Nike-inc/bartlett
@@ -20,7 +20,8 @@ library
                        Bartlett.Network,
                        Bartlett.Configuration,
                        Bartlett.Actions.Info,
-                       Bartlett.Actions.Build
+                       Bartlett.Actions.Build,
+                       Bartlett.Actions.Config
   ghc-options:
     -fwarn-tabs
     -fwarn-unused-imports

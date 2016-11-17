@@ -33,7 +33,7 @@ getInfo ::
   -> IO ()
 getInfo user base [] = return ()
 getInfo user base (path:paths) = do
-  resp <- execRequest "get" reqOpts reqUri
+  resp <- execRequest "get" reqOpts reqUri Nothing
   BL.putStrLn . toPrettyJson $ resp ^. responseBody
   getInfo user base paths
     where reqOpts = defaults & auth ?~ getBasicAuth user

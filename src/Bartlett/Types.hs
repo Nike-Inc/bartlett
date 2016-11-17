@@ -30,6 +30,8 @@ type JobParameters   = ByteString
 -- ^ Comma-separated list of key=value pairs to pass along to the triggered job.
 type Profile         = ByteString
 -- ^ The profile to use when authenticating against Jenkins.
+type ConfigPath      = FilePath
+-- ^ The path to the job configuration to upload.
 
 -- | Defines methods for basic authentication
 class BasicAuthUser a where
@@ -49,6 +51,7 @@ instance BasicAuthUser User where
 data Command =
   Info [JobPath]                        -- ^ Retrieve information for the given job.
   | Build JobPath (Maybe JobParameters) -- ^ Build the given job with the given options.
+  | Config JobPath (Maybe ConfigPath)   -- ^ Retrieve and upload job configurations.
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =

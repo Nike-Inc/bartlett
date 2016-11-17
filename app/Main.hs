@@ -6,6 +6,7 @@ import Bartlett.Types
 import qualified Bartlett.Configuration as C
 import qualified Bartlett.Actions.Info as AI
 import qualified Bartlett.Actions.Build as AB
+import qualified Bartlett.Actions.Config as AC
 import qualified Bartlett.Parsers as P
 
 import Control.Exception
@@ -74,6 +75,12 @@ executeCommand cmd usr jenkinsInstance =
       AI.getInfo usr jenkinsInstance jobPaths
     Build jobPath jobParameters ->
       AB.postBuild usr jenkinsInstance jobPath jobParameters
+    Config jobPath configFilePath ->
+      case configFilePath of
+        Just cp ->
+          AC.updateConfig usr jenkinsInstance jobPath cp
+        Nothing ->
+          AC.getConfig usr jenkinsInstance jobPath
 
 -- | Execute the appropriate sub-command given parsed cli options.
 run :: Options -> IO ()

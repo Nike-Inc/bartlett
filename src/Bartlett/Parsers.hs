@@ -54,6 +54,12 @@ parseJobParameters = option readerByteString $
   short 'o' <> long "options" <> metavar "OPTIONS" <>
   help "Comma separated list of key=value pairs to pass to the job"
 
+-- | Parse a path to the config file to update.
+parseConfigFilePath :: Parser ConfigPath
+parseConfigFilePath = option str $
+  short 'f' <> long "filepath" <> metavar "CONFIG_FILE_PATH" <>
+  help "Path to the job configuration to upload"
+
 -- | Parse an Info sub-command.
 parseInfo :: Parser Command
 parseInfo = Info <$> some (argument readerByteString (metavar "JOB_PATHS..."))
@@ -64,11 +70,18 @@ parseBuild = Build
   <$> argument readerByteString (metavar "JOB_PATH")
   <*> optional parseJobParameters
 
+-- | Parse a Config sub-command.
+parseConfig :: Parser Command
+parseConfig = Config
+  <$> argument readerByteString (metavar "JOB_PATH")
+  <*> optional parseConfigFilePath
+
 -- | Parse a Command.
 parseCommand :: Parser Command
 parseCommand = subparser $
   command "info" (parseInfo `withInfo` "Get information on the given job")
   <> command "build" (parseBuild `withInfo` "Trigger a build for the given job")
+  <> command "config" (parseConfig `withInfo` "Manage XML configurations for jobs")
 
 -- | Combinator for all command line options.
 parseOptions :: Parser Options
