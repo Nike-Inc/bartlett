@@ -183,6 +183,56 @@ Enter password:
 }
 ```
 
+### Managing Job Configurations
+
+You can manage the XML job configurations for any job on your Jenkins instance
+by using the `config` sub-command.
+
+*Note: at this time Bartlett does not support CSRF, so if you have this
+security feature enabled you will **not** be able to update configurations.
+Please see [#14] to track progress on this issue.*
+
+To get the current configuration for your job run the `config` sub-command
+against the path to your job:
+
+```xml
+bartlett --username my_user --jenkins https://my.jenkins.com \
+  config /path/to/my/job
+Enter password:
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo "lolwut there"</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
+```
+
+We can pipe the output of the previous command to a file, make some
+modifications, and then update the configuration with the following command:
+
+```
+bartlett --username my_user --jenkins https://my.jenkins.com \
+  config /path/to/my/job -f ./config.xml
+Enter password:
+{
+    "statusMessage": "OK",
+    "statusCode": 200
+}
+```
+
 ### Configuring Profiles
 
 You may store configuration values for many different Jenkins instances. First
@@ -301,3 +351,4 @@ School of British Butlers.
 [stack-install]: https://docs.haskellstack.org/en/stable/README/
 [jq-page]: https://stedolan.github.io/jq/
 [homebrew-install]: http://brew.sh/
+[#14]: https://github.com/Nike-Inc/bartlett/issues/14
