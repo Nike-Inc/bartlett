@@ -31,7 +31,7 @@ getConfig :: BasicAuthUser a =>
   -> JobPath         -- The Job for the given Jenkins instance to interact with.
   -> IO ()           -- The XML configuration for the given job.
 getConfig user base path = do
-  resp <- execRequest "get" reqOpts (configUri base path) Nothing
+  resp <- execRequest Get reqOpts (configUri base path) Nothing
   BL.putStrLn $ resp ^. responseBody
     where reqOpts = defaults & auth ?~ getBasicAuth user
 
@@ -44,6 +44,6 @@ updateConfig :: BasicAuthUser a =>
   -> IO ()
 updateConfig user base path configPath = do
   configFile <- BL.readFile configPath
-  resp <- execRequest "post" reqOpts (configUri base path) (Just configFile)
+  resp <- execRequest Post reqOpts (configUri base path) (Just configFile)
   BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
     where reqOpts = defaults & auth ?~ getBasicAuth user
