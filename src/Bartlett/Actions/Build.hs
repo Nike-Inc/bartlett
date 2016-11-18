@@ -40,7 +40,7 @@ postBuild ::
   -> Maybe JobParameters -- ^ Optional set of job parameters to trigger with.
   -> IO ()
 postBuild user base path parameters = do
-  resp <- execRequest "post" reqOpts reqUri Nothing
+  resp <- execRequest Post reqOpts reqUri Nothing
   BL.putStrLn . encodePretty . BU.toResponseStatus $
     resp ^. responseStatus
   where (suffix, buildOpts) = consBuildType parameters

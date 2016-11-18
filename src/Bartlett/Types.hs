@@ -10,7 +10,25 @@ Stability   : stable
 
 Types and type alises used throughout Bartlett.
 -}
-module Bartlett.Types where
+module Bartlett.Types (
+  -- * Type Aliases
+  JenkinsInstance,
+  Username,
+  Password,
+  JobPath,
+  JobParameters,
+  Profile,
+  ConfigPath,
+  -- * User types
+  BasicAuthUser(..),
+  User(..),
+  -- * Command-Line Types
+  Command(..),
+  Options(..),
+  -- * Network Types
+  StatusResponse(..),
+  RequestType(..)
+) where
 
 import Data.Aeson (ToJSON, FromJSON)
 import Data.ByteString.Lazy.Char8 (ByteString, toStrict)
@@ -70,3 +88,6 @@ data StatusResponse = StatusResponse {
 -- Derived JSON serlializers
 instance ToJSON StatusResponse
 instance FromJSON StatusResponse
+
+-- | Incomplete sum type for network requests
+data RequestType = Get | Post

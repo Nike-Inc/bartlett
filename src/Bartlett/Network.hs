@@ -18,6 +18,7 @@ module Bartlett.Network (
 )where
 
 import Bartlett.Util (toResponseStatus, withForcedSSL)
+import Bartlett.Types (RequestType(Get, Post))
 
 import qualified Control.Exception as E
 import Data.Aeson.Encode.Pretty (encodePretty)
@@ -30,7 +31,7 @@ import qualified Network.Wreq.Session as S
 
 -- | General request handler that provides basic error handling.
 execRequest ::
-  ByteString                  -- ^ The type of request to make (e.g. "get")
+  RequestType                 -- ^ The type of request to make
   -> Options                  -- ^ Request params to pass along with the request.
   -> ByteString               -- ^ The uri to make the request to
   -> Maybe ByteString         -- ^ The file to upload to the Jenkins instance.
@@ -41,13 +42,13 @@ execRequest requestType opts reqUrl postBody =
       -- TODO Need to get a CSRF crumb
       -- JENKINS_URL/crumbIssuer/api/json?xpath=?xpath=concat(//crumbRequestField,":",//crumb)')
       -- TODO create a proper sum type for requestType
-      "post" ->
+      Post ->
         postSession reqUrl
           `E.catch`
             recoverableErrorHandler (postSession $ withForcedSSL reqUrl)
               where fileToUpload = fromMaybe "" postBody :: ByteString
                     postSession url = S.postWith opts session (unpack url) fileToUpload
-      "get" ->
+      Get ->
         getSession reqUrl
           `E.catch`
             recoverableErrorHandler (getSession $ withForcedSSL reqUrl)
