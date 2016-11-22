@@ -36,10 +36,6 @@ requestPassword = do
   hPutChar stderr '\n'
   return $ pack s
 
--- | Given a list of possible values, choose the leftmost non-Nothing value.
-chooseValue :: [Maybe a] -> Maybe a
-chooseValue = getFirst . foldl mappend (First Nothing) . fmap First
-
 -- | Construct a namespaced service name for the OSX Keychain service.
 keychainService :: Profile -> String
 keychainService = unpack . mappend "bartlett."
@@ -86,23 +82,19 @@ executeCommand cmd usr jenkinsInstance =
 run :: Options -> IO ()
 run (Options username jenkinsInstance profile cmd) = do
   let profileName = fromMaybe "default" profile
-  cfg <- C.getConfiguration profileName
-
-  -- TODO this is all very messy, surely there should be some way
-  --      to simplify it.
-
+  cfg        <- C.getConfiguration profileName
   cfgJenkins <- C.getJenkinsInstance cfg
-  case chooseValue [jenkinsInstance, cfgJenkins] of
+  cfgUser    <- C.getUsername cfg
+  shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
+
+  case jenkinsInstance <|> cfgJenkins of
     Nothing ->
       hPutStrLn stderr "Could not determine the Jenkins instance to use."
-    Just inst -> do
-
-      cfgUser <- C.getUsername cfg
-      case chooseValue [username, cfgUser] of
+    Just inst ->
+      case username <|> cfgUser of
         Nothing ->
           hPutStrLn stderr "Could not determine username to use."
         Just usr -> do
-          shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
           pwd <- selectPassword shouldStorePassword profileName usr
           executeCommand cmd (User usr pwd) inst
 
