@@ -15,6 +15,7 @@ import Data.Maybe (fromMaybe)
 import Data.Monoid
 import Options.Applicative
 import System.IO hiding (putStr, hPutStrLn, hPutStr)
+import System.Exit (die)
 import qualified System.Keyring as SK
 
 -- | Wrapper determining if the given action should be echoed to stdout.
@@ -62,6 +63,14 @@ selectPassword shouldStorePassword profile usr = do
       else
         return pwd
 
+-- | Bind an option, but if it is not provided exit the program.
+bindOption :: Maybe a -> Maybe ByteString -> IO a
+bindOption a failMessage =
+  case a of
+    Nothing ->
+      die . unpack . fromMaybe "" $ failMessage
+    Just a ->
+      return a
 
 -- | Execute the given command with the given username and jenkins instance.
 executeCommand :: Command -> User -> JenkinsInstance -> IO ()
@@ -82,21 +91,20 @@ executeCommand cmd usr jenkinsInstance =
 run :: Options -> IO ()
 run (Options username jenkinsInstance profile cmd) = do
   let profileName = fromMaybe "default" profile
-  cfg        <- C.getConfiguration profileName
-  cfgJenkins <- C.getJenkinsInstance cfg
-  cfgUser    <- C.getUsername cfg
-  shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
+  cfg <- C.getConfiguration profileName
 
-  case jenkinsInstance <|> cfgJenkins of
-    Nothing ->
-      hPutStrLn stderr "Could not determine the Jenkins instance to use."
-    Just inst ->
-      case username <|> cfgUser of
-        Nothing ->
-          hPutStrLn stderr "Could not determine username to use."
-        Just usr -> do
-          pwd <- selectPassword shouldStorePassword profileName usr
-          executeCommand cmd (User usr pwd) inst
+  cfgJenkins <- C.getJenkinsInstance cfg
+  jenkins    <- bindOption (jenkinsInstance <|> cfgJenkins)
+                  (Just "Could not determine the Jenkins instance to use.")
+
+  cfgUser    <- C.getUsername cfg
+  usr        <- bindOption (username <|> cfgUser)
+                  (Just "Could not determine username to use.")
+
+  shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
+  pwd                 <- selectPassword shouldStorePassword profileName usr
+
+  executeCommand cmd (User usr pwd) jenkins
 
 main :: IO ()
 main = run =<< execParser (P.parseOptions `P.withInfo` "")
