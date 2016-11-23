@@ -41,7 +41,6 @@ execRequest requestType opts reqUrl postBody =
     case requestType of
       -- TODO Need to get a CSRF crumb
       -- JENKINS_URL/crumbIssuer/api/json?xpath=?xpath=concat(//crumbRequestField,":",//crumb)')
-      -- TODO create a proper sum type for requestType
       Post ->
         postSession reqUrl
           `E.catch`
@@ -57,7 +56,7 @@ execRequest requestType opts reqUrl postBody =
 
 -- | Handler that returns a JSON representation of the error status.
 simpleErrorHandler :: NHC.HttpException -> IO a
-simpleErrorHandler e@(NHC.StatusCodeException status _ _) =
+simpleErrorHandler (NHC.StatusCodeException status _ _) =
   die . unpack . encodePretty . toResponseStatus $ status
 
 -- | Attempt to recover from non-fatal errors with the provided action, otherwise
