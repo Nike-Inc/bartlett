@@ -2,20 +2,19 @@ module Main where
 
 import Prelude hiding (putStr)
 
-import Bartlett.Types
-import qualified Bartlett.Configuration as C
-import qualified Bartlett.Actions.Info as AI
-import qualified Bartlett.Actions.Build as AB
+import           Bartlett.Types
+import           Bartlett.Parsers (parseOptions, withInfo)
+import qualified Bartlett.Configuration  as C
+import qualified Bartlett.Actions.Info   as AI
+import qualified Bartlett.Actions.Build  as AB
 import qualified Bartlett.Actions.Config as AC
-import qualified Bartlett.Parsers as P
 
-import Control.Exception
-import Data.ByteString.Lazy.Char8 hiding (foldl)
+import Control.Exception (bracket_)
+import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, hPutStr)
 import Data.Maybe (fromMaybe)
-import Data.Monoid
 import Options.Applicative
-import System.IO hiding (putStr, hPutStrLn, hPutStr)
 import System.Exit (die)
+import System.IO (hFlush, stdout, stdin, stderr, hSetEcho, hGetEcho, hPutChar)
 import qualified System.Keyring as SK
 
 -- | Wrapper determining if the given action should be echoed to stdout.
@@ -107,4 +106,4 @@ run (Options username jenkinsInstance profile cmd) = do
   executeCommand cmd (User usr pwd) jenkins
 
 main :: IO ()
-main = run =<< execParser (P.parseOptions `P.withInfo` "")
+main = run =<< execParser (parseOptions `withInfo` "")
