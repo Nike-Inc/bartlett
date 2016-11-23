@@ -332,16 +332,6 @@ Or use the make target:
 make package-bin
 ```
 
-### Deployment
-
-It's too manual, but the gist is:
-
-  1. Run `make package-bin`
-  2. Rename the tarball to `bartlett-static-{version}.tar.gz`
-  3. Upload it to the tools account S3 bucket under `bartlett-dist`
-  4. Grab the URL from the properties for that tarball and then update the
-  associated recipe in the Homebrew tap
-
 ### What's in a name?
 
 [Leslie Bartlett][bartlett-wiki] was a famous butler who founded the London
