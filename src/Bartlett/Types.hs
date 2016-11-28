@@ -34,8 +34,9 @@ import Data.Aeson (ToJSON, FromJSON)
 import Data.ByteString.Lazy.Char8 (ByteString, toStrict)
 import GHC.Generics (Generic)
 import Network.Wreq (Auth, basicAuth)
+import URI.ByteString (URIRef, Absolute)
 
-type JenkinsInstance = ByteString
+type JenkinsInstance = URIRef Absolute
 -- ^ Base URI for the desired Jenkins instance.
 type Username        = ByteString
 -- ^ Username to authenticate with against Jenkins.

@@ -20,7 +20,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 import Network.Wreq (responseStatus, responseBody, defaults, auth)
 
 -- | Construct a URL to interact with Job configurations.
-configUri :: JenkinsInstance -> JobPath -> BL.ByteString
+configUri :: JenkinsInstance -> JobPath -> JenkinsInstance
 configUri base path =
   mkUrl base path "/config.xml"
 

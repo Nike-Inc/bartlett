@@ -42,7 +42,8 @@ library
                        lens-aeson,
                        text,
                        http-types,
-                       http-client
+                       http-client,
+                       uri-bytestring
 
 executable bartlett
   main-is:             app/Main.hs
@@ -82,4 +83,6 @@ test-suite bartlett-test
                            aeson,
                            wreq,
                            http-types,
-                           lens
+                           lens,
+                           uri-bytestring,
+                           either-unwrap

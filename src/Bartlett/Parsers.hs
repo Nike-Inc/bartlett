@@ -12,7 +12,8 @@ module Bartlett.Parsers where
 
 import Bartlett.Types
 
-import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack)
+import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, toStrict)
+import URI.ByteString (URIRef, Absolute, parseURI, strictURIParserOptions)
 import Options.Applicative
 import Options.Applicative.Types (readerAsk)
 
@@ -21,6 +22,16 @@ readerByteString :: ReadM ByteString
 readerByteString = do
   s <- readerAsk
   return $ pack s
+
+-- | Parse a command line option as a "URIRef"
+readerUriRef :: ReadM (URIRef Absolute)
+readerUriRef = do
+  s <- readerAsk
+  case parseURI strictURIParserOptions (toStrict $ pack s) of
+    Left a ->
+      readerAbort (ErrorMsg (show a))
+    Right uri ->
+      return uri
 
 -- | Wrap parsers with doc strings and metadata.
 withInfo :: Parser a -> ByteString -> ParserInfo a
@@ -44,7 +55,7 @@ parseUsername = option readerByteString $
 
 -- | Parse a Jenkins instance url.
 parseJenkinsInstance :: Parser JenkinsInstance
-parseJenkinsInstance = option readerByteString $
+parseJenkinsInstance = option readerUriRef $
   short 'j' <> long "jenkins" <> metavar "JENKINS_INSTANCE" <>
   help "The Jenkins instance to interact with"
 

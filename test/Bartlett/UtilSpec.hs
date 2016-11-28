@@ -12,15 +12,26 @@ import qualified Network.Wreq as W
 import Network.HTTP.Types.Status hiding (statusCode, statusMessage)
 import Test.Hspec
 
+import URI.ByteString
+import Data.Either.Unwrap
+
+-- | Helper to create instances of 'JenkinsInstance'.
+jenkins :: Bool -> JenkinsInstance
+jenkins withSSL =
+  fromRight $ parseURI strictURIParserOptions url
+    where url = if withSSL
+                   then "https://example.com"
+                   else "http://example.com"
+
 spec :: Spec
 spec =
   describe "Util tests" $ do
 
     describe "mkUrl" $ do
       it "should return the JSON API at the root of the base url when no JobPath is given" $
-        unpack (mkUrl "https://example.com" "" "/api/json") `shouldEndWith` "/api/json"
+        uriToString (mkUrl (jenkins False) "" "/api/json") `shouldEndWith` "/api/json"
       it "should return a fully qualified API endpoint when given a JobPath" $
-        unpack (mkUrl "https://example.com" "foo" "/api/json") `shouldBe` "https://example.com/job/foo/api/json"
+        uriToString (mkUrl (jenkins True) "foo" "/api/json") `shouldBe` "https://example.com/job/foo/api/json"
 
     describe "mkJobPath" $ do
       it "should return the empty string given empty input" $
@@ -36,12 +47,9 @@ spec =
 
     describe "withForcedSSL" $ do
       it "should return a uri with the https protocol" $
-        unpack (withForcedSSL "lol") `shouldStartWith` "https://"
-      it "should return a uri with the https protocol when http is provided" $
-        withForcedSSL "http://foo" `shouldBe` "https://foo"
-      it "should return a uri with the https protocol when https is provided" $ do
-        let url = "https://foo"
-        withForcedSSL url `shouldBe` url
+        uriToString (withForcedSSL (jenkins False)) `shouldStartWith` "https://"
+      it "should return a uri with the https protocol when https is provided" $
+        withForcedSSL (jenkins True) `shouldBe` jenkins True
 
     describe "segmentPath" $ do
       it "should return an empty collection if nothing is passed in" $

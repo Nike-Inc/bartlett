@@ -17,8 +17,8 @@ module Bartlett.Network (
   recoverableErrorHandler
 )where
 
-import Bartlett.Util (toResponseStatus, withForcedSSL)
-import Bartlett.Types (RequestType(Get, Post))
+import Bartlett.Util (uriToString, toResponseStatus, withForcedSSL)
+import Bartlett.Types (RequestType(Get, Post), JenkinsInstance)
 
 import qualified Control.Exception as E
 import Data.Aeson.Encode.Pretty (encodePretty)
@@ -33,7 +33,7 @@ import qualified Network.Wreq.Session as S
 execRequest ::
   RequestType                 -- ^ The type of request to make
   -> Options                  -- ^ Request params to pass along with the request.
-  -> ByteString               -- ^ The uri to make the request to
+  -> JenkinsInstance               -- ^ The uri to make the request to
   -> Maybe ByteString         -- ^ The file to upload to the Jenkins instance.
   -> IO (Response ByteString)
 execRequest requestType opts reqUrl postBody =
@@ -46,12 +46,12 @@ execRequest requestType opts reqUrl postBody =
           `E.catch`
             recoverableErrorHandler (postSession $ withForcedSSL reqUrl)
               where fileToUpload = fromMaybe "" postBody :: ByteString
-                    postSession url = S.postWith opts session (unpack url) fileToUpload
+                    postSession url = S.postWith opts session (uriToString url) fileToUpload
       Get ->
         getSession reqUrl
           `E.catch`
-            recoverableErrorHandler (getSession $ withForcedSSL reqUrl)
-              where getSession url = S.getWith opts session (unpack url)
+            recoverableErrorHandler (getSession . withForcedSSL $ reqUrl)
+              where getSession url = S.getWith opts session (uriToString url)
 
 
 -- | Handler that returns a JSON representation of the error status.

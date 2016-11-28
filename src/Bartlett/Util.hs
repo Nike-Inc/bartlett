@@ -21,6 +21,7 @@ module Bartlett.Util (
   toText,
   toPrettyJson,
   toResponseStatus,
+  uriToString,
   -- * Query Parameter Helpers
   parseParameters,
   parametersBuilder,
@@ -31,18 +32,21 @@ import Prelude hiding (concat, null, dropWhile)
 
 import Bartlett.Types
 
-import Control.Lens (set)
+import Control.Lens (set, (^.))
 import Data.Aeson (decode, Object)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy.Char8
+import Data.ByteString.Builder (toLazyByteString)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Network.Wreq as W
 import Network.HTTP.Types.Status
+import URI.ByteString (pathL, uriSchemeL, schemeBSL, serializeURIRef)
 
 -- | Constructs a valid Jenkins API url.
-mkUrl :: JenkinsInstance -> JobPath -> ByteString -> ByteString
-mkUrl base path suffix = concat [base, mkJobPath path, suffix]
+mkUrl :: JenkinsInstance -> JobPath -> ByteString -> JenkinsInstance
+mkUrl base path suffix =
+  set pathL (toStrict $ concat [mkJobPath path, suffix]) base
 
 -- | Given a slash-delimited path, return that same path interspersed with '/job/'.
 mkJobPath :: JobPath -> ByteString
@@ -53,9 +57,12 @@ mkJobPath s   = append "/job/" . intercalate "/job/" . segmentPath $ s
 -- | Given a base Jenkins instance, force the use of HTTPS
 withForcedSSL :: JenkinsInstance -> JenkinsInstance
 withForcedSSL base =
-  if "http://" `isPrefixOf` base || "https://" `isPrefixOf` base
-     then concat ["https", dropWhile (/=':') base]
-     else concat ["https://", base]
+  case base ^. uriSchemeL . schemeBSL of
+    "http" ->
+      -- TODO there should be a cleaner interface for this
+      set (uriSchemeL . schemeBSL) "https" base
+    _ ->
+      base
 
 -- | Segment a slash-delimited string as well as filter empty elements.
 segmentPath :: ByteString -> [ByteString]
@@ -82,6 +89,10 @@ toResponseStatus (Status code msg) =
     statusCode = code,
     statusMessage = (unpack . fromStrict) msg
   }
+
+-- | Serialize a URI to a String
+uriToString :: JenkinsInstance -> String
+uriToString = unpack . toLazyByteString . serializeURIRef
 
 -- | Given a comma delimited list of key=value pairs, return a collection
 -- of pairs.
