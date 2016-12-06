@@ -72,7 +72,7 @@ bindOption a failMessage =
       return a
 
 -- | Execute the given command with the given username and jenkins instance.
-executeCommand :: Command -> User -> JenkinsInstance -> IO ()
+executeCommand :: Command -> Maybe User -> JenkinsInstance -> IO ()
 executeCommand cmd usr jenkinsInstance =
   case cmd of
     Info jobPaths ->
@@ -96,14 +96,19 @@ run (Options username jenkinsInstance profile cmd) = do
   jenkins    <- bindOption (jenkinsInstance <|> cfgJenkins)
                   (Just "Could not determine the Jenkins instance to use.")
 
-  cfgUser    <- C.getUsername cfg
-  usr        <- bindOption (username <|> cfgUser)
-                  (Just "Could not determine username to use.")
-
   shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
-  pwd                 <- selectPassword shouldStorePassword profileName usr
+  cfgUser    <- C.getUsername cfg
+  usr        <- userWithPassword (username <|> cfgUser)
+                                 (selectPassword shouldStorePassword profileName)
 
-  executeCommand cmd (User usr pwd) jenkins
+  executeCommand cmd usr jenkins
+
+-- There is probably a better way to do this
+userWithPassword :: Maybe Username -> (Username -> IO Password) -> IO (Maybe User)
+userWithPassword Nothing _ = return Nothing
+userWithPassword (Just username) getPwd = do
+  password <- getPwd username
+  return $ Just (User username password)
 
 main :: IO ()
 main = run =<< execParser (parseOptions `withInfo` "")
