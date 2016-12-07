@@ -14,7 +14,8 @@ import Bartlett.Network (execRequest)
 import Bartlett.Types
 import Bartlett.Util (toResponseStatus, mkUrl)
 
-import Control.Lens ((^.), (?~), (&))
+import Control.Lens (set, (^.), (&))
+import Data.Maybe (Maybe)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import qualified Data.ByteString.Lazy.Char8 as BL
 import Network.Wreq (responseStatus, responseBody, defaults, auth)
@@ -26,18 +27,18 @@ configUri base path =
 
 -- | Retrieve the XML configuration for the given job.
 getConfig :: BasicAuthUser a =>
-  a                  -- The user to authenticate with.
+  Maybe a            -- The user to authenticate with.
   -> JenkinsInstance -- The Jenkins instance to interact with.
   -> JobPath         -- The Job for the given Jenkins instance to interact with.
   -> IO ()           -- The XML configuration for the given job.
 getConfig user base path = do
   resp <- execRequest Get reqOpts (configUri base path) Nothing
   BL.putStrLn $ resp ^. responseBody
-    where reqOpts = defaults & auth ?~ getBasicAuth user
+    where reqOpts = defaults & set auth (getBasicAuth <$> user)
 
 -- | Update the XML configuration for the given job.
 updateConfig :: BasicAuthUser a =>
-  a                  -- The user to authenticate with.
+  Maybe a            -- The user to authenticate with.
   -> JenkinsInstance -- The Jenkins instance to interact with.
   -> JobPath         -- The Job for the given Jenkins instance to interact with.
   -> ConfigPath      -- Path to the XML configuration to upload to Jenkins.
@@ -46,4 +47,4 @@ updateConfig user base path configPath = do
   configFile <- BL.readFile configPath
   resp <- execRequest Post reqOpts (configUri base path) (Just configFile)
   BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
-    where reqOpts = defaults & auth ?~ getBasicAuth user
+    where reqOpts = defaults & set auth (getBasicAuth <$> user)
