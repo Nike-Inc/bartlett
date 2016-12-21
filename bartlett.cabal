@@ -43,7 +43,8 @@ library
                        text,
                        http-types,
                        http-client,
-                       uri-bytestring
+                       uri-bytestring,
+                       case-insensitive
 
 executable bartlett
   main-is:             app/Main.hs

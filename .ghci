@@ -1,0 +1,4 @@
+-- Fire up the REPL with some niceties
+:m Control.Lens Data.Aeson Data.Aeson.Lens Network.Wreq
+:l test/ReplSugar.hs
+:set -XOverloadedStrings

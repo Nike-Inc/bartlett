@@ -12,6 +12,7 @@ A collection of utility methods used throughout Bartlett.
 -}
 module Bartlett.Util (
   -- * URL Helpers
+  setPath,
   mkUrl,
   mkJobPath,
   withForcedSSL,
@@ -19,6 +20,7 @@ module Bartlett.Util (
   pairToTuple,
   -- * Type Conversions
   toText,
+  toByteString,
   toPrettyJson,
   toResponseStatus,
   uriToString,
@@ -43,10 +45,14 @@ import qualified Network.Wreq as W
 import Network.HTTP.Types.Status
 import URI.ByteString (pathL, uriSchemeL, schemeBSL, serializeURIRef)
 
+setPath :: JenkinsInstance -> ByteString -> JenkinsInstance
+setPath jenkins path =
+  set pathL (toStrict path) jenkins
+
 -- | Constructs a valid Jenkins API url.
 mkUrl :: JenkinsInstance -> JobPath -> ByteString -> JenkinsInstance
 mkUrl base path suffix =
-  set pathL (toStrict $ concat [mkJobPath path, suffix]) base
+  setPath base $ concat [mkJobPath path, suffix]
 
 -- | Given a slash-delimited path, return that same path interspersed with '/job/'.
 mkJobPath :: JobPath -> ByteString
@@ -59,7 +65,6 @@ withForcedSSL :: JenkinsInstance -> JenkinsInstance
 withForcedSSL base =
   case base ^. uriSchemeL . schemeBSL of
     "http" ->
-      -- TODO there should be a cleaner interface for this
       set (uriSchemeL . schemeBSL) "https" base
     _ ->
       base
@@ -77,6 +82,9 @@ pairToTuple _      = error "Attempted to convert a list of size != 2 to a 2-tupl
 -- | Convert a lazy "ByteString" to "Text".
 toText :: ByteString -> T.Text
 toText = TE.decodeUtf8 . toStrict
+
+toByteString :: T.Text -> ByteString
+toByteString = fromStrict . TE.encodeUtf8
 
 -- | Return a pretty-formatted JSON string
 toPrettyJson :: ByteString -> ByteString

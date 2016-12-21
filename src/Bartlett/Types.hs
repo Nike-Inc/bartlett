@@ -36,6 +36,8 @@ import GHC.Generics (Generic)
 import Network.Wreq (Auth, basicAuth)
 import URI.ByteString (URIRef, Absolute)
 
+-- TODO use newtypes!! doesn't require boxing
+
 type JenkinsInstance = URIRef Absolute
 -- ^ Base URI for the desired Jenkins instance.
 type Username        = ByteString
