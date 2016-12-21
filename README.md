@@ -188,10 +188,6 @@ Enter password:
 You can manage the XML job configurations for any job on your Jenkins instance
 by using the `config` sub-command.
 
-*Note: at this time Bartlett does not support CSRF, so if you have this
-security feature enabled you will **not** be able to update configurations.
-Please see [#14] to track progress on this issue.*
-
 To get the current configuration for your job run the `config` sub-command
 against the path to your job:
 
