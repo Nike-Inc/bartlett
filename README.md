@@ -8,10 +8,10 @@ We live on the command line, and anything that can help us stay there longer is
 a boon to productivity. While the Jenkins web interface is nice for many, it is
 a distracting context switch for us.
 
-My goal for this tool is to replicate many of the workflows that we use
+Our goal for this tool is to replicate many of the workflows that we use
 day-to-day through the web interface in a single, easy to use command line
 client. Additionally, many of the existing clients are either not under active
-development or do not follow the same usage patterns as Bartlett.
+development or do not satisfy the below requirements for a CLI Jenkins client.
 
 ##### Why not just use the Jenkins CLI jar?
 
@@ -19,47 +19,44 @@ A few reasons:
 
   1. `bartlett`'s focus is on translating workflows from the web ui to the
   command line.
-      * It is _not_ mean to be a replacement for the Jenkins CLI jar, where the
-      primary focus is on remotely administrating a Jenkins instance.
+      * It is _not_ meant to be a replacement for the Jenkins CLI jar, where the
+      primary focus is on remotely administrating a Jenkins instance
   2. `bartlett`'s output is primarly JSON, which means that it can be piped
-  into tools like [jq][jq-page] and scripted programmatically.
+  into tools like [jq][jq-page] and scripted programmatically
   3. Profile support to alleviate the tedium of working with multiple Jenkins
   instances
       * Similar in spirit to AWS CLI profiles
   4. Some Jenkins instances are not configured to allow JNLP access
-      * `bartlett` talks to Jenkins over its REST API and does not suffer this
-      limitation.
-  5. We want a tool that could be installed as a static binary
+      * `bartlett` instead talks to Jenkins over its REST API
+  5. We want a tool that can be installed as a static binary
 
 ##### And why not just use curl?
 
 You could, but you'll end up tying a lot more in the long run. `bartlett`'s
-support for profiles means that authentication and Jenkins instance resolution
-are done for you at invocation. You also don't have to worry about exposing
-your password since `bartlett` doesn't accept it as a configuration or
-command line option (only requested at runtime with hidden input).
+support for profiles and CSRF crumb generation means that authentication and
+Jenkins instance resolution are done for you at invocation. You also don't
+have to worry about exposing your password since `bartlett` doesn't accept it
+as a configuration or command line option (only requested at runtime with
+hidden input).
+
+## Supported Platforms
+
+`bartlett` is currently built and tested for the following platforms:
+
+|Platform|Version|
+|--------|-------|
+|Mac OSX | El Capitan and above |
+
+If you would like to assist in building and testing versions for more platforms
+please check
+[the issue tracker for your platform of choice](https://github.com/Nike-Inc/bartlett/issues?q=is%3Aissue+is%3Aopen+label%3A%22Platform+Support%22).
 
 ## Installation
 
 ### from Homebrew
 
-Make sure you have [Homebrew installed][homebrew-install] before proceeding.
-
-<span style="color:red;">TODO: add Homebrew recipe upstream for bartlett</span>
-
-```bash
-brew install bartlett
-```
-
-#### Updating
-
-Homebrew updates itself by pulling down the latest revisions of the git
-repositories that provide its recipes. To upgrade to the latest version of
-Bartlett begin by updating Homebrew itself before upgrading Bartlett.
-
-```bash
-brew update && brew ugprade bartlett
-```
+Please track the following issue for Homebrew support:
+https://github.com/Nike-Inc/bartlett/issues/4
 
 ### from Source
 
@@ -74,8 +71,9 @@ cd bartlett && stack build && stack install
 
 ## Getting Help
 
-Please file an issue in the issue tracker with as complete a description of your
-issue as possible.
+At this time the best way to contact us is
+[by filing an issue](https://github.com/Nike-Inc/bartlett/issues/new). We hope
+to expand our level of support to other mediums in the near future.
 
 ## Usage
 
@@ -84,7 +82,7 @@ issue as possible.
 Bartlett will honor any protocol explicitly passed on the command line or via
 configuration. However, if no protocol is provided then Bartlett will attempt
 to contact your Jenkins instance via HTTPS. It is _strongly_ recommended that
-you talk to your Jenkins instance via HTTPS if possible.
+you talk to your Jenkins instance via HTTPS when possible.
 
 ### Getting Help at the Command Line
 
@@ -108,6 +106,7 @@ Available options:
 Available commands:
   info                     Get information on the given job
   build                    Trigger a build for the given job
+  config                   Manage XML configurations for jobs
 
 Copyright (c) Nike, Inc. 2016
 ```
@@ -115,7 +114,7 @@ Copyright (c) Nike, Inc. 2016
 ### Querying Existing Jobs
 
 You can query for basic information about a given job by providing the path
-from root of your Jenkins instance to the desired job.
+from the root of your Jenkins instance to the desired job.
 
 For example, if my job exists at
 `https://my.jenkins-instance.com/job/TEST/job/testJob/`, then I can query
@@ -299,8 +298,8 @@ stack ghci
 
 #### Running Tests on File Change
 
-When actively working on a feature I'll typically run the following to get
-automatic feedback as I write code:
+When actively working on a feature we'll typically run the following to get
+automatic feedback as we write code:
 
 ```bash
 stack build --test --coverage --haddock --copy-bins --file-watch
@@ -319,7 +318,7 @@ To exit out of this loop type `quit` (instead of C-c).
 Surprise, more Stack options!
 
 ```bash
-stack build --ghc-options='-optl-static -optl-pthread' --force-dirty --haddock --copy-bins
+stack build --force-dirty --haddock --copy-bins
 ```
 
 Or use the make target:
@@ -337,4 +336,3 @@ School of British Butlers.
 [stack-install]: https://docs.haskellstack.org/en/stable/README/
 [jq-page]: https://stedolan.github.io/jq/
 [homebrew-install]: http://brew.sh/
-[#14]: https://github.com/Nike-Inc/bartlett/issues/14
