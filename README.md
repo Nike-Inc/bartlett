@@ -1,5 +1,4 @@
 # bartlett
-![](https://travis-ci.org/Nike-Inc/bartlett.svg?branch=master)
 
 A simple Jenkins command line client to serve your needs.
 
