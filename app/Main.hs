@@ -43,12 +43,11 @@ keychainService = unpack . mappend "bartlett."
 -- | Given a username and profile retrieve the user's password.
 --
 -- Optionally store the user's password in the OSX Keychain.
-selectPassword :: Bool -> Profile -> Username -> IO Password
-selectPassword shouldStorePassword profile usr = do
+selectPassword :: Bool -> Bool -> Profile -> Username -> IO Password
+selectPassword shouldStorePassword shouldRefreshCredentials profile usr = do
   let service = SK.Service (keychainService profile)
 
-  pwdFromKeyChain <-
-    SK.getPassword service (SK.Username (unpack usr))
+  pwdFromKeyChain <- SK.getPassword service (SK.Username (unpack usr))
 
   case pwdFromKeyChain of
     Just (SK.Password pwd) ->
@@ -88,7 +87,7 @@ executeCommand cmd usr jenkinsInstance =
 
 -- | Execute the appropriate sub-command given parsed cli options.
 run :: Options -> IO ()
-run (Options username jenkinsInstance profile cmd) = do
+run (Options username jenkinsInstance profile refreshCredentials cmd) = do
   let profileName = fromMaybe "default" profile
   cfg <- C.getConfiguration profileName
 
@@ -99,7 +98,7 @@ run (Options username jenkinsInstance profile cmd) = do
   shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
   cfgUser    <- C.getUsername cfg
   usr        <- userWithPassword (username <|> cfgUser)
-                                 (selectPassword shouldStorePassword profileName)
+                                 (selectPassword shouldStorePassword refreshCredentials profileName)
 
   executeCommand cmd usr jenkins
 

@@ -76,7 +76,7 @@ data Command =
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =
-  Options (Maybe Username) (Maybe JenkinsInstance) (Maybe Profile) Command
+  Options (Maybe Username) (Maybe JenkinsInstance) (Maybe Profile) Bool Command
 
 -- | Wrapper around Wreq's 'Status' type.
 --
