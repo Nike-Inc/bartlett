@@ -38,7 +38,7 @@ resolver: lts-7.3
 packages:
 - '.'
 - location:
-      git: git@github.com:dogonthehorizon/haskell-keyring
+      git: https://github.com/dogonthehorizon/haskell-keyring.git
       commit: ce751c51cc1463463d434c5b612078a689b54723
   extra-dep: true
 
