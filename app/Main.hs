@@ -47,7 +47,13 @@ selectPassword :: Bool -> Bool -> Profile -> Username -> IO Password
 selectPassword shouldStorePassword shouldRefreshCredentials profile usr = do
   let service = SK.Service (keychainService profile)
 
-  pwdFromKeyChain <- SK.getPassword service (SK.Username (unpack usr))
+  -- Attempt to get the user's password from the Keychain service,
+  -- unless we've been asked to refresh the credentials cache by the user
+  -- via the --refresh-credentials flag
+  pwdFromKeyChain <-
+    if shouldRefreshCredentials
+      then return Nothing
+      else SK.getPassword service (SK.Username (unpack usr))
 
   case pwdFromKeyChain of
     Just (SK.Password pwd) ->
