@@ -62,7 +62,10 @@ selectPassword shouldStorePassword shouldRefreshCredentials profile usr = do
       pwd <- requestPassword
       if shouldStorePassword
          then do
-          SK.setPassword service (SK.Username (unpack usr)) (SK.Password (unpack pwd))
+          let storeFn = if shouldRefreshCredentials
+                           then SK.updatePassword
+                           else SK.setPassword
+          storeFn service (SK.Username (unpack usr)) (SK.Password (unpack pwd))
           return pwd
       else
         return pwd
