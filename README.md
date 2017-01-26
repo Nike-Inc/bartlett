@@ -2,6 +2,27 @@
 
 A simple Jenkins command line client to serve your needs.
 
+## Tabel of Contents
+
+  - [Motivation](#motivation)
+    - [Why not just use the Jenkins CLI jar?](#why-not-just-use-the-jenkins-cli-jar)
+    - [And why not just use curl?](#and-why-not-just-use-curl)
+  - [Supported Platforms](#supported-platforms)
+  - [Installation](#installation)
+    - [from Homebrew](#from-homebrew)
+    - [from Source](#from-source)
+  - [Getting Help](#getting-help)
+  - [Usage](#usage)
+    - [Getting Help at the Command Line](#getting-help-at-the-command-line)
+    - [Querying Existing Jobs](#querying-existing-jobs)
+    - [Triggering Job Builds](#triggering-job-builds)
+    - [Managing Job Configurations](#managing-job-configurations)
+    - [Configuring Profiles](#configuring-profiles)
+      - [Supported Configuration Values](#supported-configuration-values)
+        - [A note on password storage](#a-note-on-password-storage)
+  - [Development](#development)
+  - [What's in a name?](#whats-in-a-name)
+
 #### Motivation
 
 We live on the command line, and anything that can help us stay there longer is
@@ -19,15 +40,15 @@ A few reasons:
 
   1. `bartlett`'s focus is on translating workflows from the web ui to the
   command line.
-      * It is _not_ meant to be a replacement for the Jenkins CLI jar, where the
+      - It is _not_ meant to be a replacement for the Jenkins CLI jar, where the
       primary focus is on remotely administrating a Jenkins instance
   2. `bartlett`'s output is primarly JSON, which means that it can be piped
   into tools like [jq][jq-page] and scripted programmatically
   3. Profile support to alleviate the tedium of working with multiple Jenkins
   instances
-      * Similar in spirit to AWS CLI profiles
+      - Similar in spirit to AWS CLI profiles
   4. Some Jenkins instances are not configured to allow JNLP access
-      * `bartlett` instead talks to Jenkins over its REST API
+      - `bartlett` instead talks to Jenkins over its REST API
   5. We want a tool that can be installed as a static binary
 
 ##### And why not just use curl?
