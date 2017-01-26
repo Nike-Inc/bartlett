@@ -93,7 +93,7 @@ $ bartlett -h
 bartlett - the Jenkins command-line tool to serve your needs.
 
 Usage: bartlett [-u|--username USERNAME] [-j|--jenkins JENKINS_INSTANCE]
-                [-p|--profile PROFILE_NAME] COMMAND
+                [-p|--profile PROFILE_NAME] [--refresh-credentials] COMMAND
 
 Available options:
   -h,--help                Show this help text
@@ -102,6 +102,8 @@ Available options:
                            The Jenkins instance to interact with
   -p,--profile PROFILE_NAME
                            The profile to source values from
+  --refresh-credentials    Force a refresh of the credentials cache for the
+                           current profile.
 
 Available commands:
   info                     Get information on the given job
@@ -279,6 +281,14 @@ The following values are supported by the latest version of Bartlett:
 Bartlett will attempt to store user credentials using OSX's Keychain service.
 By default, passwords **are not** stored and must explictly enable storage
 using the above configuration options _for each profile_.
+
+If for any reason your password becomes incorrect or you'd like to change the
+cached user for a given profile, then you may refresh the stored information for
+a profile by passing the `--refresh-credentials` flag:
+
+```
+bartlett --refresh-credentials --profile my_profile info /
+```
 
 ## Development
 
