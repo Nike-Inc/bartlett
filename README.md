@@ -38,18 +38,18 @@ development or do not satisfy the below requirements for a CLI Jenkins client.
 
 A few reasons:
 
-  1. `bartlett`'s focus is on translating workflows from the web ui to the
+  - `bartlett`'s focus is on translating workflows from the web ui to the
   command line.
       - It is _not_ meant to be a replacement for the Jenkins CLI jar, where the
       primary focus is on remotely administrating a Jenkins instance
-  2. `bartlett`'s output is primarly JSON, which means that it can be piped
+  - `bartlett`'s output is primarly JSON, which means that it can be piped
   into tools like [jq][jq-page] and scripted programmatically
-  3. Profile support to alleviate the tedium of working with multiple Jenkins
+  - Profile support to alleviate the tedium of working with multiple Jenkins
   instances
       - Similar in spirit to AWS CLI profiles
-  4. Some Jenkins instances are not configured to allow JNLP access
+  - Some Jenkins instances are not configured to allow JNLP access
       - `bartlett` instead talks to Jenkins over its REST API
-  5. We want a tool that can be installed as a static binary
+  - We want a tool that can be installed as a static binary
 
 ##### And why not just use curl?
 
