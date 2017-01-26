@@ -41,6 +41,12 @@ withInfo opts desc = info (helper <*> opts)
   <> header "bartlett - the Jenkins command-line tool to serve your needs."
   <> footer "Copyright (c) Nike, Inc. 2016")
 
+-- | Parse a credentials flag.
+parseRefreshCredentials :: Parser Bool
+parseRefreshCredentials = switch $
+  long "refresh-credentials"
+  <> help "Force a refresh of the credentials cache for the current profile."
+
 -- | Parse a 'Profile'.
 parseProfile :: Parser Profile
 parseProfile = option readerByteString $
@@ -100,4 +106,5 @@ parseOptions = Options
   <$> optional parseUsername
   <*> optional parseJenkinsInstance
   <*> optional parseProfile
+  <*> parseRefreshCredentials
   <*> parseCommand

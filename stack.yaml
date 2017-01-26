@@ -38,8 +38,8 @@ resolver: lts-7.3
 packages:
 - '.'
 - location:
-      git: git@github.com:dogonthehorizon/haskell-keyring
-      commit: ce751c51cc1463463d434c5b612078a689b54723
+      git: https://github.com/dogonthehorizon/haskell-keyring.git
+      commit: 56d7176ba0e8860ab0abab3dfca9a218ab387da9
   extra-dep: true
 
 # Dependency packages to be pulled from upstream that are not in the resolver
