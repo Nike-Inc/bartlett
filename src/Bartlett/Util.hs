@@ -83,6 +83,7 @@ pairToTuple _      = error "Attempted to convert a list of size != 2 to a 2-tupl
 toText :: ByteString -> T.Text
 toText = TE.decodeUtf8 . toStrict
 
+-- | Convert a "Text" to a "ByteString"
 toByteString :: T.Text -> ByteString
 toByteString = fromStrict . TE.encodeUtf8
 

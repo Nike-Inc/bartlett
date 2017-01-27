@@ -49,6 +49,7 @@ updateConfig user base path configPath = do
   BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
     where reqOpts = defaults & set auth (getBasicAuth <$> user)
 
+-- | Delete the XML configuration for the given job.
 deleteConfig :: BasicAuthUser a =>
   Maybe a              -- The user to authenticate with.
   -> JenkinsInstance   -- The Jenkins instance to interact with.

@@ -77,6 +77,7 @@ parseConfigFilePath = option str $
   short 'f' <> long "filepath" <> metavar "CONFIG_FILE_PATH" <>
   help "Path to the job configuration to upload"
 
+-- | Parse whether we should delete the given resource.
 parseDeleteFlag :: Parser DeleteFlag
 parseDeleteFlag = switch $
   short 'd' <> long "delete"
