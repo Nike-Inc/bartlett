@@ -19,6 +19,7 @@ module Bartlett.Types (
   JobParameters,
   Profile,
   ConfigPath,
+  DeleteFlag,
   -- * User types
   BasicAuthUser(..),
   User(..),
@@ -53,6 +54,8 @@ type Profile         = ByteString
 -- ^ The profile to use when authenticating against Jenkins.
 type ConfigPath      = FilePath
 -- ^ The path to the job configuration to upload.
+type DeleteFlag      = Bool
+-- ^ Should we delete the current item?
 
 -- | Defines methods for basic authentication
 class BasicAuthUser a where
@@ -70,9 +73,9 @@ instance BasicAuthUser User where
 
 -- | Represents all available sub-commands for 'Bartlett'.
 data Command =
-  Info [JobPath]                        -- ^ Retrieve information for the given job.
-  | Build JobPath (Maybe JobParameters) -- ^ Build the given job with the given options.
-  | Config JobPath (Maybe ConfigPath)   -- ^ Retrieve and upload job configurations.
+  Info [JobPath]                                 -- ^ Retrieve information for the given job.
+  | Build JobPath (Maybe JobParameters)          -- ^ Build the given job with the given options.
+  | Config DeleteFlag JobPath (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =

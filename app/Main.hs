@@ -87,12 +87,15 @@ executeCommand cmd usr jenkinsInstance =
       AI.getInfo usr jenkinsInstance jobPaths
     Build jobPath jobParameters ->
       AB.postBuild usr jenkinsInstance jobPath jobParameters
-    Config jobPath configFilePath ->
-      case configFilePath of
-        Just cp ->
-          AC.updateConfig usr jenkinsInstance jobPath cp
-        Nothing ->
-          AC.getConfig usr jenkinsInstance jobPath
+    Config deleteFlag jobPath configFilePath ->
+      if deleteFlag
+         then AC.deleteConfig usr jenkinsInstance jobPath
+         else
+            case configFilePath of
+              Just cp ->
+                AC.updateConfig usr jenkinsInstance jobPath cp
+              Nothing ->
+                AC.getConfig usr jenkinsInstance jobPath
 
 -- | Execute the appropriate sub-command given parsed cli options.
 run :: Options -> IO ()

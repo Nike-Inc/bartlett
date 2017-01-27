@@ -20,7 +20,7 @@ module Bartlett.Network (
 )where
 
 import qualified Bartlett.Util as BU
-import           Bartlett.Types (RequestType(Get, Post), JenkinsInstance)
+import           Bartlett.Types (RequestType(..), JenkinsInstance)
 
 import qualified Control.Exception as E
 import           Control.Lens ((.~), (^?), (&))
@@ -31,7 +31,7 @@ import           Data.ByteString.Lazy.Char8 (ByteString, unpack, toStrict)
 import           Data.Maybe (fromMaybe)
 import qualified Network.HTTP.Client as NHC
 import           System.Exit (die)
-import           Network.Wreq (Options, Response, param, responseBody, header, defaults)
+import           Network.Wreq (Options, Response, param, responseBody, header)
 import qualified Network.Wreq.Session as S
 
 
@@ -48,7 +48,7 @@ requestCSRFToken sess opts jenkins = do
     Left _ ->
       return (Nothing, Nothing)
     Right r ->
-      return $
+      return
         (BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumbRequestField") . _String),
          BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumb") . _String))
   where reqUri = BU.setPath jenkins "/crumbIssuer/api/json"

@@ -77,6 +77,11 @@ parseConfigFilePath = option str $
   short 'f' <> long "filepath" <> metavar "CONFIG_FILE_PATH" <>
   help "Path to the job configuration to upload"
 
+parseDeleteFlag :: Parser DeleteFlag
+parseDeleteFlag = switch $
+  short 'd' <> long "delete"
+  <> help "Delete the given job path"
+
 -- | Parse an Info sub-command.
 parseInfo :: Parser Command
 parseInfo = Info <$> some (argument readerByteString (metavar "JOB_PATHS..."))
@@ -90,7 +95,8 @@ parseBuild = Build
 -- | Parse a Config sub-command.
 parseConfig :: Parser Command
 parseConfig = Config
-  <$> argument readerByteString (metavar "JOB_PATH")
+  <$> parseDeleteFlag
+  <*> argument readerByteString (metavar "JOB_PATH")
   <*> optional parseConfigFilePath
 
 -- | Parse a Command.

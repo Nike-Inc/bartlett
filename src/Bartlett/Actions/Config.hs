@@ -48,3 +48,13 @@ updateConfig user base path configPath = do
   resp <- execRequest Post reqOpts (configUri base path) (Just configFile)
   BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
     where reqOpts = defaults & set auth (getBasicAuth <$> user)
+
+deleteConfig :: BasicAuthUser a =>
+  Maybe a            -- The user to authenticate with.
+  -> JenkinsInstance -- The Jenkins instance to interact with.
+  -> JobPath         -- The job for the given Jenkins instance to delete.
+  -> IO ()
+deleteConfig user base path = do
+  resp <- execRequest Post reqOpts (mkUrl base path "/doDelete") Nothing
+  BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
+    where reqOpts = defaults & set auth (getBasicAuth <$> user)
