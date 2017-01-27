@@ -75,7 +75,7 @@ instance BasicAuthUser User where
 data Command =
   Info [JobPath]                                 -- ^ Retrieve information for the given job.
   | Build JobPath (Maybe JobParameters)          -- ^ Build the given job with the given options.
-  | Config DeleteFlag JobPath (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
+  | Config DeleteFlag [JobPath] (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =

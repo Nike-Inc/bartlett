@@ -93,9 +93,9 @@ executeCommand cmd usr jenkinsInstance =
          else
             case configFilePath of
               Just cp ->
-                AC.updateConfig usr jenkinsInstance jobPath cp
+                AC.updateConfig usr jenkinsInstance (head jobPath) cp
               Nothing ->
-                AC.getConfig usr jenkinsInstance jobPath
+                AC.getConfig usr jenkinsInstance (head jobPath)
 
 -- | Execute the appropriate sub-command given parsed cli options.
 run :: Options -> IO ()

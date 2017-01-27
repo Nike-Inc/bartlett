@@ -96,7 +96,7 @@ parseBuild = Build
 parseConfig :: Parser Command
 parseConfig = Config
   <$> parseDeleteFlag
-  <*> argument readerByteString (metavar "JOB_PATH")
+  <*> some (argument readerByteString (metavar "JOB_PATH..."))
   <*> optional parseConfigFilePath
 
 -- | Parse a Command.
