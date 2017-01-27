@@ -2,7 +2,7 @@
 
 A simple Jenkins command line client to serve your needs.
 
-## Tabel of Contents
+## Table of Contents
 
   - [Motivation](#motivation)
     - [Why not just use the Jenkins CLI jar?](#why-not-just-use-the-jenkins-cli-jar)
