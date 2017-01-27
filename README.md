@@ -1,4 +1,4 @@
-# bartlett
+# bartlett [![Build Status](https://travis-ci.org/Nike-Inc/bartlett.svg?branch=master)](https://travis-ci.org/Nike-Inc/bartlett)
 
 A simple Jenkins command line client to serve your needs.
 
