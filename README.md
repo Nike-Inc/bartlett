@@ -17,6 +17,8 @@ A simple Jenkins command line client to serve your needs.
     - [Querying Existing Jobs](#querying-existing-jobs)
     - [Triggering Job Builds](#triggering-job-builds)
     - [Managing Job Configurations](#managing-job-configurations)
+      - [Deleting Existing Jobs](#deleting-existing-jobs)
+    - [Downloading Artifacts for a Given Job](#downloading-artifacts-for-a-given-job)
     - [Configuring Profiles](#configuring-profiles)
       - [Supported Configuration Values](#supported-configuration-values)
         - [A note on password storage](#a-note-on-password-storage)
@@ -249,6 +251,42 @@ Enter password:
     "statusMessage": "OK",
     "statusCode": 200
 }
+```
+
+#### Deleting Existing Jobs
+
+You can delete an existing job by passing the `-d` flag to a `config` command:
+
+```
+bartlett --username user --jenkins https://my-jenkins.com \
+  config -d /path/to/job/to/delete
+Enter password:
+{
+    "statusMessage": "OK",
+    "statusCode": 200
+}
+```
+
+### Downloading Artifacts for a Given Job
+
+Artifacts can be downloaded for a given job by using the `artifact` sub-command.
+At this time only one artifcat may be downloaded at a time.
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  artifact /path/to/job my-artifact-id
+Enter password:
+echo "foo" > foo.txt
+```
+
+Artifacts are currently sent to STDOUT, which works for simple files, but my not be
+desirable for larger files or binaries. It is recommended at this time to pipe
+artifact output directly to a file:
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  artifact /path/to/job my-artifact-id > my-artifact-id.txt
+Enter password:
 ```
 
 ### Configuring Profiles
