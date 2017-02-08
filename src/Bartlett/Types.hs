@@ -20,6 +20,7 @@ module Bartlett.Types (
   Profile,
   ConfigPath,
   DeleteFlag,
+  ArtifactId,
   -- * User types
   BasicAuthUser(..),
   User(..),
@@ -48,6 +49,8 @@ type Password        = ByteString
 type JobPath         = ByteString
 -- ^ Slash-delimited string representing the path to the job for the given
 -- Jenkins instance.
+type ArtifactId      = ByteString
+-- ^ The artifact to download from the given job.
 type JobParameters   = ByteString
 -- ^ Comma-separated list of key=value pairs to pass along to the triggered job.
 type Profile         = ByteString
@@ -73,9 +76,10 @@ instance BasicAuthUser User where
 
 -- | Represents all available sub-commands for 'Bartlett'.
 data Command =
-  Info [JobPath]                                 -- ^ Retrieve information for the given job.
-  | Build JobPath (Maybe JobParameters)          -- ^ Build the given job with the given options.
+  Info [JobPath]                                   -- ^ Retrieve information for the given job.
+  | Build JobPath (Maybe JobParameters)            -- ^ Build the given job with the given options.
   | Config DeleteFlag [JobPath] (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
+  | Artifact JobPath ArtifactId                    -- ^ Retrieve the given artifact from the given job.
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =

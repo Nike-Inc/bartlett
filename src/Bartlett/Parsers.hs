@@ -100,12 +100,19 @@ parseConfig = Config
   <*> some (argument readerByteString (metavar "JOB_PATH..."))
   <*> optional parseConfigFilePath
 
+-- | Parse an Artifact sub-command.
+parseArtifact :: Parser Command
+parseArtifact = Artifact
+  <$> argument readerByteString (metavar "JOB_PATH")
+  <*> argument readerByteString (metavar "ARTIFACT_ID")
+
 -- | Parse a Command.
 parseCommand :: Parser Command
 parseCommand = subparser $
   command "info" (parseInfo `withInfo` "Get information on the given job")
   <> command "build" (parseBuild `withInfo` "Trigger a build for the given job")
   <> command "config" (parseConfig `withInfo` "Manage XML configurations for jobs")
+  <> command "artifact" (parseArtifact `withInfo` "Download artifacts from jobs")
 
 -- | Combinator for all command line options.
 parseOptions :: Parser Options
