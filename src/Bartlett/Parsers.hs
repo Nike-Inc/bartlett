@@ -1,7 +1,7 @@
 {-|
 Module      : Parsers
 Description : Parsers used to extract command line options at invocation
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
@@ -39,7 +39,7 @@ withInfo opts desc = info (helper <*> opts)
   (fullDesc
   <> progDesc (unpack desc)
   <> header "bartlett - the Jenkins command-line tool to serve your needs."
-  <> footer "Copyright (c) Nike, Inc. 2016")
+  <> footer "Copyright (c) Nike, Inc. 2016-present")
 
 -- | Parse a credentials flag.
 parseRefreshCredentials :: Parser Bool

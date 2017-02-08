@@ -1,7 +1,7 @@
 {-|
 Module      : Info
 Description : Methods for executing informational requests against Jenkins
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable

@@ -1,12 +1,12 @@
 {-|
 Module      : Info
-Description : Methods for executing informational requests against Jenkins
-Copyright   : (c) Nike, Inc., 2016
+Description : Methods for downloading job artifacts from Jenkins
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
 
-Methods for executing informational requests against Jenkins.
+Methods for downloading job artifacts from Jenkins.
 -}
 module Bartlett.Actions.Artifact (
   getArtifact

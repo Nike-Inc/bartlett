@@ -3,7 +3,7 @@
 {-|
 Module      : Types
 Description : Type declarations used throughout Bartlett
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
