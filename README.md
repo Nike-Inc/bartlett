@@ -132,8 +132,9 @@ Available commands:
   info                     Get information on the given job
   build                    Trigger a build for the given job
   config                   Manage XML configurations for jobs
+  artifact                 Download artifacts from jobs
 
-Copyright (c) Nike, Inc. 2016
+Copyright (c) Nike, Inc. 2016-present
 ```
 
 ### Querying Existing Jobs
