@@ -1,7 +1,7 @@
 {-|
 Module      : Parsers
 Description : Parsers used to extract command line options at invocation
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
@@ -39,7 +39,7 @@ withInfo opts desc = info (helper <*> opts)
   (fullDesc
   <> progDesc (unpack desc)
   <> header "bartlett - the Jenkins command-line tool to serve your needs."
-  <> footer "Copyright (c) Nike, Inc. 2016")
+  <> footer "Copyright (c) Nike, Inc. 2016-present")
 
 -- | Parse a credentials flag.
 parseRefreshCredentials :: Parser Bool
@@ -77,6 +77,12 @@ parseConfigFilePath = option str $
   short 'f' <> long "filepath" <> metavar "CONFIG_FILE_PATH" <>
   help "Path to the job configuration to upload"
 
+-- | Parse whether we should delete the given resource.
+parseDeleteFlag :: Parser DeleteFlag
+parseDeleteFlag = switch $
+  short 'd' <> long "delete"
+  <> help "Delete the given job path"
+
 -- | Parse an Info sub-command.
 parseInfo :: Parser Command
 parseInfo = Info <$> some (argument readerByteString (metavar "JOB_PATHS..."))
@@ -90,8 +96,15 @@ parseBuild = Build
 -- | Parse a Config sub-command.
 parseConfig :: Parser Command
 parseConfig = Config
-  <$> argument readerByteString (metavar "JOB_PATH")
+  <$> parseDeleteFlag
+  <*> some (argument readerByteString (metavar "JOB_PATH..."))
   <*> optional parseConfigFilePath
+
+-- | Parse an Artifact sub-command.
+parseArtifact :: Parser Command
+parseArtifact = Artifact
+  <$> argument readerByteString (metavar "JOB_PATH")
+  <*> argument readerByteString (metavar "ARTIFACT_ID")
 
 -- | Parse a Command.
 parseCommand :: Parser Command
@@ -99,6 +112,7 @@ parseCommand = subparser $
   command "info" (parseInfo `withInfo` "Get information on the given job")
   <> command "build" (parseBuild `withInfo` "Trigger a build for the given job")
   <> command "config" (parseConfig `withInfo` "Manage XML configurations for jobs")
+  <> command "artifact" (parseArtifact `withInfo` "Download artifacts from jobs")
 
 -- | Combinator for all command line options.
 parseOptions :: Parser Options

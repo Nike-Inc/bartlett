@@ -10,6 +10,7 @@ A simple Jenkins command line client to serve your needs.
   - [Supported Platforms](#supported-platforms)
   - [Installation](#installation)
     - [from Homebrew](#from-homebrew)
+      - [Updating Bartlett with Homebrew](#updating-bartlett-with-homebrew)
     - [from Source](#from-source)
   - [Getting Help](#getting-help)
   - [Usage](#usage)
@@ -17,6 +18,8 @@ A simple Jenkins command line client to serve your needs.
     - [Querying Existing Jobs](#querying-existing-jobs)
     - [Triggering Job Builds](#triggering-job-builds)
     - [Managing Job Configurations](#managing-job-configurations)
+      - [Deleting Existing Jobs](#deleting-existing-jobs)
+    - [Downloading Artifacts for a Given Job](#downloading-artifacts-for-a-given-job)
     - [Configuring Profiles](#configuring-profiles)
       - [Supported Configuration Values](#supported-configuration-values)
         - [A note on password storage](#a-note-on-password-storage)
@@ -76,8 +79,38 @@ please check
 
 ### from Homebrew
 
-Please track the following issue for Homebrew support:
-https://github.com/Nike-Inc/bartlett/issues/4
+Homebrew is an OSX specific application that allows users to install
+applications that didn't come with Apple's operating system.
+
+For help installing Homebrew [see the installation instructions here.](http://brew.sh/)
+
+If you haven't already, be sure to enable Nike's tap:
+
+```
+brew tap nike-inc/nike && brew update
+```
+
+Then install bartlett with the following command:
+
+```
+brew install bartlett
+```
+
+#### Updating Bartlett with Homebrew
+
+Recent versions of Homebrew periodically refresh package indexes, but if you do
+not see the latest version of Bartlett then running the following command
+will force a refresh:
+
+```
+brew update
+```
+
+Then, upgrade to the latest version
+
+```
+brew upgrade bartlett
+```
 
 ### from Source
 
@@ -130,8 +163,9 @@ Available commands:
   info                     Get information on the given job
   build                    Trigger a build for the given job
   config                   Manage XML configurations for jobs
+  artifact                 Download artifacts from jobs
 
-Copyright (c) Nike, Inc. 2016
+Copyright (c) Nike, Inc. 2016-present
 ```
 
 ### Querying Existing Jobs
@@ -249,6 +283,42 @@ Enter password:
     "statusMessage": "OK",
     "statusCode": 200
 }
+```
+
+#### Deleting Existing Jobs
+
+You can delete an existing job by passing the `-d` flag to a `config` command:
+
+```
+bartlett --username user --jenkins https://my-jenkins.com \
+  config -d /path/to/job/to/delete
+Enter password:
+{
+    "statusMessage": "OK",
+    "statusCode": 200
+}
+```
+
+### Downloading Artifacts for a Given Job
+
+Artifacts can be downloaded for a given job by using the `artifact` sub-command.
+At this time only one artifcat may be downloaded at a time.
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  artifact /path/to/job my-artifact-id
+Enter password:
+echo "foo" > foo.txt
+```
+
+Artifacts are currently sent to STDOUT, which works for simple files, but my not be
+desirable for larger files or binaries. It is recommended at this time to pipe
+artifact output directly to a file:
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  artifact /path/to/job my-artifact-id > my-artifact-id.txt
+Enter password:
 ```
 
 ### Configuring Profiles

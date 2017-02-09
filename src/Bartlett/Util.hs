@@ -3,7 +3,7 @@
 {-|
 Module      : Util
 Description : Utility methods used throughout Bartlett
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
@@ -83,6 +83,7 @@ pairToTuple _      = error "Attempted to convert a list of size != 2 to a 2-tupl
 toText :: ByteString -> T.Text
 toText = TE.decodeUtf8 . toStrict
 
+-- | Convert a "Text" to a "ByteString"
 toByteString :: T.Text -> ByteString
 toByteString = fromStrict . TE.encodeUtf8
 

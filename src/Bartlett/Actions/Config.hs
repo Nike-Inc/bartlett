@@ -1,7 +1,7 @@
 {-|
 Module      : Config
 Description : Methods for executing config requests against Jenkins
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
@@ -47,4 +47,17 @@ updateConfig user base path configPath = do
   configFile <- BL.readFile configPath
   resp <- execRequest Post reqOpts (configUri base path) (Just configFile)
   BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
+    where reqOpts = defaults & set auth (getBasicAuth <$> user)
+
+-- | Delete the XML configuration for the given job.
+deleteConfig :: BasicAuthUser a =>
+  Maybe a              -- The user to authenticate with.
+  -> JenkinsInstance   -- The Jenkins instance to interact with.
+  -> [JobPath]         -- The job for the given Jenkins instance to delete.
+  -> IO ()
+deleteConfig user base [] = return ()
+deleteConfig user base (path:paths) = do
+  resp <- execRequest Post reqOpts (mkUrl base path "/doDelete") Nothing
+  BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
+  deleteConfig user base paths
     where reqOpts = defaults & set auth (getBasicAuth <$> user)

@@ -3,7 +3,7 @@
 {-|
 Module      : Types
 Description : Type declarations used throughout Bartlett
-Copyright   : (c) Nike, Inc., 2016
+Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
@@ -19,6 +19,8 @@ module Bartlett.Types (
   JobParameters,
   Profile,
   ConfigPath,
+  DeleteFlag,
+  ArtifactId,
   -- * User types
   BasicAuthUser(..),
   User(..),
@@ -47,12 +49,16 @@ type Password        = ByteString
 type JobPath         = ByteString
 -- ^ Slash-delimited string representing the path to the job for the given
 -- Jenkins instance.
+type ArtifactId      = ByteString
+-- ^ The artifact to download from the given job.
 type JobParameters   = ByteString
 -- ^ Comma-separated list of key=value pairs to pass along to the triggered job.
 type Profile         = ByteString
 -- ^ The profile to use when authenticating against Jenkins.
 type ConfigPath      = FilePath
 -- ^ The path to the job configuration to upload.
+type DeleteFlag      = Bool
+-- ^ Should we delete the current item?
 
 -- | Defines methods for basic authentication
 class BasicAuthUser a where
@@ -70,9 +76,10 @@ instance BasicAuthUser User where
 
 -- | Represents all available sub-commands for 'Bartlett'.
 data Command =
-  Info [JobPath]                        -- ^ Retrieve information for the given job.
-  | Build JobPath (Maybe JobParameters) -- ^ Build the given job with the given options.
-  | Config JobPath (Maybe ConfigPath)   -- ^ Retrieve and upload job configurations.
+  Info [JobPath]                                   -- ^ Retrieve information for the given job.
+  | Build JobPath (Maybe JobParameters)            -- ^ Build the given job with the given options.
+  | Config DeleteFlag [JobPath] (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
+  | Artifact JobPath ArtifactId                    -- ^ Retrieve the given artifact from the given job.
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =

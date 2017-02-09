@@ -8,6 +8,7 @@ import qualified Bartlett.Configuration  as C
 import qualified Bartlett.Actions.Info   as AI
 import qualified Bartlett.Actions.Build  as AB
 import qualified Bartlett.Actions.Config as AC
+import qualified Bartlett.Actions.Artifact as AA
 
 import Control.Exception (bracket_)
 import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, hPutStr)
@@ -87,12 +88,17 @@ executeCommand cmd usr jenkinsInstance =
       AI.getInfo usr jenkinsInstance jobPaths
     Build jobPath jobParameters ->
       AB.postBuild usr jenkinsInstance jobPath jobParameters
-    Config jobPath configFilePath ->
-      case configFilePath of
-        Just cp ->
-          AC.updateConfig usr jenkinsInstance jobPath cp
-        Nothing ->
-          AC.getConfig usr jenkinsInstance jobPath
+    Artifact jobPath artifactId ->
+      AA.getArtifact usr jenkinsInstance jobPath artifactId
+    Config deleteFlag jobPath configFilePath ->
+      if deleteFlag
+         then AC.deleteConfig usr jenkinsInstance jobPath
+         else
+            case configFilePath of
+              Just cp ->
+                AC.updateConfig usr jenkinsInstance (head jobPath) cp
+              Nothing ->
+                AC.getConfig usr jenkinsInstance (head jobPath)
 
 -- | Execute the appropriate sub-command given parsed cli options.
 run :: Options -> IO ()
