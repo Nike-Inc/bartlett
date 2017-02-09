@@ -10,6 +10,7 @@ A simple Jenkins command line client to serve your needs.
   - [Supported Platforms](#supported-platforms)
   - [Installation](#installation)
     - [from Homebrew](#from-homebrew)
+      - [Updating Bartlett with Homebrew](#updating-bartlett-with-homebrew)
     - [from Source](#from-source)
   - [Getting Help](#getting-help)
   - [Usage](#usage)
@@ -78,8 +79,38 @@ please check
 
 ### from Homebrew
 
-Please track the following issue for Homebrew support:
-https://github.com/Nike-Inc/bartlett/issues/4
+Homebrew is an OSX specific application that allows users to install
+applications that didn't come with Apple's operating system.
+
+For help installing Homebrew [see the installation instructions here.](http://brew.sh/)
+
+If you haven't already, be sure to enable Nike's tap:
+
+```
+brew tap nike-inc/nike && brew update
+```
+
+Then install bartlett with the following command:
+
+```
+brew install bartlett
+```
+
+#### Updating Bartlett with Homebrew
+
+Recent versions of Homebrew periodically refresh package indexes, but if you do
+not see the latest version of Bartlett then running the following command
+will force a refresh:
+
+```
+brew update
+```
+
+Then, upgrade to the latest version
+
+```
+brew upgrade bartlett
+```
 
 ### from Source
 
