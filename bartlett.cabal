@@ -22,7 +22,8 @@ library
                        Bartlett.Actions.Info,
                        Bartlett.Actions.Build,
                        Bartlett.Actions.Config,
-                       Bartlett.Actions.Artifact
+                       Bartlett.Actions.Artifact,
+                       Bartlett.Actions.Log
   ghc-options:
     -fwarn-tabs
     -fwarn-unused-imports

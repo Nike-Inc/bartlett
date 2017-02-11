@@ -21,6 +21,8 @@ module Bartlett.Types (
   ConfigPath,
   DeleteFlag,
   ArtifactId,
+  FollowOutputFlag,
+  BuildNumber,
   -- * User types
   BasicAuthUser(..),
   User(..),
@@ -59,6 +61,10 @@ type ConfigPath      = FilePath
 -- ^ The path to the job configuration to upload.
 type DeleteFlag      = Bool
 -- ^ Should we delete the current item?
+type FollowOutputFlag = Bool
+-- ^ Should we follow log output for the current job?
+type BuildNumber     = ByteString
+-- ^ The build number for the given job.
 
 -- | Defines methods for basic authentication
 class BasicAuthUser a where
@@ -80,6 +86,7 @@ data Command =
   | Build JobPath (Maybe JobParameters)            -- ^ Build the given job with the given options.
   | Config DeleteFlag [JobPath] (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
   | Artifact JobPath ArtifactId                    -- ^ Retrieve the given artifact from the given job.
+  | Log FollowOutputFlag JobPath BuildNumber       -- ^ Print the log output for a given job.
 
 -- | Represents all available CLI options for 'Bartlett'.
 data Options =

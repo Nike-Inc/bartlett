@@ -1,15 +1,15 @@
 {-|
 Module      : Log
-Description : Methods for downloading job artifacts from Jenkins
+Description : Methods for printing or following log output
 Copyright   : (c) Nike, Inc., 2016-present
 License     : BSD3
 Maintainer  : fernando.freire@nike.com
 Stability   : stable
 
-Methods for downloading job artifacts from Jenkins.
+Methods for printing or following log output.
 -}
-module Bartlett.Actions.Artifact (
-  getArtifact
+module Bartlett.Actions.Log (
+  getLogs
 ) where
 
 import Bartlett.Network (execRequest)
@@ -19,18 +19,19 @@ import Bartlett.Util (mkUrl)
 import Control.Lens (set, (^.), (&))
 import Data.Maybe (Maybe)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.Wreq (responseBody, defaults, auth)
+import Network.Wreq (responseBody, defaults, auth, param)
 
--- | Download an artifact from the provided job.
-getArtifact ::
+getLogs ::
   BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
   -> JenkinsInstance         -- ^ The Jenkins instance to authenticate against.
-  -> JobPath                 -- ^ The job to get the artifact from.
-  -> ArtifactId              -- ^ The artifact to get from the job.
+  -> FollowOutputFlag        -- ^ Whether to follow log output or not.
+  -> JobPath                 -- ^ The job to get logs for.
+  -> BuildNumber             -- ^ The build number to get logs for.
   -> IO ()
-getArtifact user base path artifactId = do
+getLogs user base followFlag path buildNumber = do
   resp <- execRequest Get reqOpts reqUri Nothing
   BL.putStrLn $ resp ^. responseBody
     where reqOpts = defaults & set auth (getBasicAuth <$> user)
+                      . set (param "start") ["0"]
           reqUri  = mkUrl base path $
-                      BL.concat ["/lastSuccessfulBuild/artifact/", artifactId]
+            BL.concat ["/", buildNumber, "/logText/progressiveText"]

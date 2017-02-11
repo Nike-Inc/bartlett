@@ -9,6 +9,7 @@ import qualified Bartlett.Actions.Info   as AI
 import qualified Bartlett.Actions.Build  as AB
 import qualified Bartlett.Actions.Config as AC
 import qualified Bartlett.Actions.Artifact as AA
+import qualified Bartlett.Actions.Log as AL
 
 import Control.Exception (bracket_)
 import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, hPutStr)
@@ -90,6 +91,8 @@ executeCommand cmd usr jenkinsInstance =
       AB.postBuild usr jenkinsInstance jobPath jobParameters
     Artifact jobPath artifactId ->
       AA.getArtifact usr jenkinsInstance jobPath artifactId
+    Log followFlag jobPath buildNumber ->
+      AL.getLogs usr jenkinsInstance followFlag jobPath buildNumber
     Config deleteFlag jobPath configFilePath ->
       if deleteFlag
          then AC.deleteConfig usr jenkinsInstance jobPath

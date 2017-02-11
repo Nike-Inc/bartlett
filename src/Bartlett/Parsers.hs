@@ -106,6 +106,19 @@ parseArtifact = Artifact
   <$> argument readerByteString (metavar "JOB_PATH")
   <*> argument readerByteString (metavar "ARTIFACT_ID")
 
+-- | Parse whether we should follow log output for the given job.
+parseFollowFlag :: Parser FollowOutputFlag
+parseFollowFlag = switch $
+  short 'f' <> long "follow"
+  <> help "If present, follow log oputput for the current job"
+
+-- | Parse a Log sub-command.
+parseLog :: Parser Command
+parseLog = Log
+  <$> parseFollowFlag
+  <*> argument readerByteString (metavar "JOB_PATH")
+  <*> argument readerByteString (metavar "BUILD_NUMBER")
+
 -- | Parse a Command.
 parseCommand :: Parser Command
 parseCommand = subparser $
@@ -113,6 +126,7 @@ parseCommand = subparser $
   <> command "build" (parseBuild `withInfo` "Trigger a build for the given job")
   <> command "config" (parseConfig `withInfo` "Manage XML configurations for jobs")
   <> command "artifact" (parseArtifact `withInfo` "Download artifacts from jobs")
+  <> command "log" (parseLog `withInfo` "Print (or follow) log output for jobs")
 
 -- | Combinator for all command line options.
 parseOptions :: Parser Options
