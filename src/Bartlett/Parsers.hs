@@ -75,7 +75,7 @@ parseJobParameters = option readerByteString $
 parseConfigFilePath :: Parser ConfigPath
 parseConfigFilePath = option str $
   short 'f' <> long "filepath" <> metavar "CONFIG_FILE_PATH" <>
-  help "Path to the job configuration to upload"
+  help "If present, the path to the job configuration to upload for an existing job."
 
 -- | Parse whether we should delete the given resource.
 parseDeleteFlag :: Parser DeleteFlag

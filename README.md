@@ -18,6 +18,7 @@ A simple Jenkins command line client to serve your needs.
     - [Querying Existing Jobs](#querying-existing-jobs)
     - [Triggering Job Builds](#triggering-job-builds)
     - [Managing Job Configurations](#managing-job-configurations)
+      - [Updating Existing Jobs](#updating-existing-jobs)
       - [Deleting Existing Jobs](#deleting-existing-jobs)
     - [Downloading Artifacts for a Given Job](#downloading-artifacts-for-a-given-job)
     - [Configuring Profiles](#configuring-profiles)
@@ -271,6 +272,8 @@ Enter password:
   <buildWrappers/>
 </project>
 ```
+
+#### Updating Existing Jobs
 
 We can pipe the output of the previous command to a file, make some
 modifications, and then update the configuration with the following command:
