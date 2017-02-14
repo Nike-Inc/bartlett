@@ -56,7 +56,7 @@ A few reasons:
 
 ##### And why not just use curl?
 
-You could, but you'll end up tying a lot more in the long run. `bartlett`'s
+You could, but you'll end up typing a lot more in the long run. `bartlett`'s
 support for profiles and CSRF crumb generation means that authentication and
 Jenkins instance resolution are done for you at invocation. You also don't
 have to worry about exposing your password since `bartlett` doesn't accept it
