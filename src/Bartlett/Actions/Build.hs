@@ -12,8 +12,6 @@ module Bartlett.Actions.Build (
   postBuild
 ) where
 
-import Prelude hiding (putStrLn)
-
 import Bartlett.Network (execRequest)
 import Bartlett.Types
 import qualified Bartlett.Util as BU

@@ -27,7 +27,7 @@ import           Control.Lens ((.~), (^?), (&))
 import           Data.Aeson.Encode.Pretty (encodePretty)
 import           Data.Aeson.Lens (key, _String)
 import qualified Data.CaseInsensitive as CI
-import           Data.ByteString.Lazy.Char8 (ByteString, unpack, toStrict)
+import           Data.ByteString.Lazy.Char8 (ByteString, unpack, toStrict, empty)
 import           Data.Maybe (fromMaybe)
 import qualified Network.HTTP.Client as NHC
 import           System.Exit (die)
@@ -57,7 +57,7 @@ requestCSRFToken sess opts jenkins = do
 -- | Construct a valid header from a potential CSRF response.
 consCSRFHeader :: IO (Maybe ByteString, Maybe ByteString) -> IO (Options -> Options)
 consCSRFHeader ioCrumb = ioCrumb >>= \ (field, crumb) ->
-  return $ header (CI.mk . toStrict . fromMaybe "" $ field) .~ [(toStrict . fromMaybe "") crumb]
+  return $ header (CI.mk . toStrict . fromMaybe empty $ field) .~ [(toStrict . fromMaybe empty) crumb]
 
 
 -- | General request handler that provides basic error handling.
