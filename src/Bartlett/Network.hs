@@ -86,8 +86,8 @@ execRequest requestType reqOpts reqUrl postBody =
 
 -- | Handler that returns a JSON representation of the error status.
 simpleErrorHandler :: NHC.HttpException -> IO a
-simpleErrorHandler (NHC.StatusCodeException status _ _) =
-  die . unpack . encodePretty . BU.toResponseStatus $ status
+simpleErrorHandler (NHC.HttpExceptionRequest _ (NHC.StatusCodeException resp _)) =
+  die . unpack . encodePretty . BU.toResponseStatus . NHC.responseStatus $ resp
 
 -- | Attempt to recover from non-fatal errors with the provided action, otherwise
 --   fail again with the 'simpleErrorHandler'

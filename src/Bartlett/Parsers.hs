@@ -13,6 +13,7 @@ module Bartlett.Parsers where
 import Bartlett.Types
 
 import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, toStrict)
+import Data.Monoid ((<>))
 import URI.ByteString (URIRef, Absolute, parseURI, strictURIParserOptions)
 import Options.Applicative
 import Options.Applicative.Types (readerAsk)
