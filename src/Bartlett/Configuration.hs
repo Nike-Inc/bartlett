@@ -37,8 +37,8 @@ defaultConfigLoc = "$(HOME)" </> ".bartlett.cfg"
 --
 --   Returns an empty configuration if it could not load the default.
 getConfiguration :: Profile -> IO Config
-getConfiguration profile =
-  C.subconfig (toText profile) <$> C.load [Optional defaultConfigLoc]
+getConfiguration p =
+  C.subconfig (toText p) <$> C.load [Optional defaultConfigLoc]
 
 -- | Retrieve the username for the given profile.
 getUsername :: Config -> IO (Maybe Username)

@@ -17,21 +17,22 @@ import Bartlett.Types
 import Bartlett.Util (mkUrl)
 
 import Control.Lens (set, (^.), (&))
-import Data.Maybe (Maybe)
+import Control.Monad.Reader (asks, liftIO)
+import Data.Maybe (fromJust)
+import Data.Monoid ((<>))
 import qualified Data.ByteString.Lazy.Char8 as BL
 import Network.Wreq (responseBody, defaults, auth, param)
 
 getLogs ::
   BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
-  -> JenkinsInstance         -- ^ The Jenkins instance to authenticate against.
   -> FollowOutputFlag        -- ^ Whether to follow log output or not.
   -> JobPath                 -- ^ The job to get logs for.
   -> BuildNumber             -- ^ The build number to get logs for.
-  -> IO ()
-getLogs user base followFlag path buildNumber = do
-  resp <- execRequest Get reqOpts reqUri Nothing
-  BL.putStrLn $ resp ^. responseBody
-    where reqOpts = defaults & set auth (getBasicAuth <$> user)
-                      . set (param "start") ["0"]
-          reqUri  = mkUrl base path $
-            BL.concat ["/", buildNumber, "/logText/progressiveText"]
+  -> Bartlett ()
+getLogs user followFlag path buildNumber = do
+  jenkins <- fromJust <$> asks jenkinsInstance
+  -- TODO make this a bit cleaner
+  resp <- liftIO $ execRequest Get reqOpts (mkUrl jenkins path $ "/" <> buildNumber <> "/logText/progressiveText") Nothing
+  liftIO $ BL.putStrLn $ resp ^. responseBody
+  where reqOpts = defaults & set auth (getBasicAuth <$> user)
+                    . set (param "start") ["0"]

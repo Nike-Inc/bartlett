@@ -12,6 +12,7 @@ import qualified Bartlett.Actions.Artifact as AA
 import qualified Bartlett.Actions.Log as AL
 
 import Control.Exception (bracket_)
+import Control.Monad.Reader (local, liftIO, ask, asks, runReaderT)
 import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, hPutStr)
 import Data.Maybe (fromMaybe)
 import Options.Applicative
@@ -81,45 +82,6 @@ bindOption a failMessage =
     Just a ->
       return a
 
--- | Execute the given command with the given username and jenkins instance.
-executeCommand :: Command -> Maybe User -> JenkinsInstance -> IO ()
-executeCommand cmd usr jenkinsInstance =
-  case cmd of
-    Info jobPaths ->
-      AI.getInfo usr jenkinsInstance jobPaths
-    Build jobPath jobParameters ->
-      AB.postBuild usr jenkinsInstance jobPath jobParameters
-    Artifact jobPath artifactId ->
-      AA.getArtifact usr jenkinsInstance jobPath artifactId
-    Log followFlag jobPath buildNumber ->
-      AL.getLogs usr jenkinsInstance followFlag jobPath buildNumber
-    Config deleteFlag jobPath configFilePath ->
-      if deleteFlag
-         then AC.deleteConfig usr jenkinsInstance jobPath
-         else
-            case configFilePath of
-              Just cp ->
-                AC.updateConfig usr jenkinsInstance (head jobPath) cp
-              Nothing ->
-                AC.getConfig usr jenkinsInstance (head jobPath)
-
--- | Execute the appropriate sub-command given parsed cli options.
-run :: Options -> IO ()
-run (Options username jenkinsInstance profile refreshCredentials cmd) = do
-  let profileName = fromMaybe "default" profile
-  cfg <- C.getConfiguration profileName
-
-  cfgJenkins <- C.getJenkinsInstance cfg
-  jenkins    <- bindOption (jenkinsInstance <|> cfgJenkins)
-                  (Just "Could not determine the Jenkins instance to use.")
-
-  shouldStorePassword <- fromMaybe False <$> C.getStorePassword cfg
-  cfgUser    <- C.getUsername cfg
-  usr        <- userWithPassword (username <|> cfgUser)
-                                 (selectPassword shouldStorePassword refreshCredentials profileName)
-
-  executeCommand cmd usr jenkins
-
 -- There is probably a better way to do this
 userWithPassword :: Maybe Username -> (Username -> IO Password) -> IO (Maybe User)
 userWithPassword Nothing _ = return Nothing
@@ -127,5 +89,44 @@ userWithPassword (Just username) getPwd = do
   password <- getPwd username
   return $ Just (User username password)
 
+-- | Execute the appropriate sub-command given parsed cli options.
+run :: Bartlett ()
+run = do
+  profile <- fromMaybe "default" <$> asks profile
+  config  <- liftIO $ C.getConfiguration profile
+  configJenkins <- liftIO $ C.getJenkinsInstance config
+  usersJenkins <- asks jenkinsInstance
+  jenkins <- liftIO $ bindOption (usersJenkins <|> configJenkins)
+                (Just "Could not determine the Jenkins instance to use.")
+  shouldStorePassword <- liftIO $ fromMaybe False <$> C.getStorePassword config
+  configUser <- liftIO $ C.getUsername config
+  userUser   <- asks username
+  refreshCredentials <- asks refreshCredentials
+  usr <- liftIO $ userWithPassword (userUser <|> configUser)
+                                   (selectPassword shouldStorePassword refreshCredentials profile)
+  command <- asks cmd
+  options <- ask
+
+  local (const $ options { jenkinsInstance=Just jenkins }) $
+    case command of
+      Info jobPaths ->
+        AI.getInfo usr jobPaths
+      Build jobPath jobParameters ->
+        AB.postBuild usr jobPath jobParameters
+      Artifact jobPath artifactId ->
+        AA.getArtifact usr jobPath artifactId
+      Log followFlag jobPath buildNumber ->
+        AL.getLogs usr followFlag jobPath buildNumber
+      Config deleteFlag jobPath configFilePath ->
+        if deleteFlag
+           then AC.deleteConfig usr jobPath
+           else
+              case configFilePath of
+                Just cp ->
+                  AC.updateConfig usr (head jobPath) cp
+                Nothing ->
+                  AC.getConfig usr (head jobPath)
+
 main :: IO ()
-main = run =<< execParser (parseOptions `withInfo` "")
+main = execParser (parseOptions `withInfo` "") >>= \opts ->
+  runReaderT (runBartlett run) opts

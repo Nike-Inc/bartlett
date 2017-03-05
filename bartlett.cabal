@@ -46,7 +46,9 @@ library
                        http-types,
                        http-client,
                        uri-bytestring,
-                       case-insensitive
+                       case-insensitive,
+                       mtl,
+                       transformers
 
 executable bartlett
   main-is:             app/Main.hs
@@ -63,7 +65,8 @@ executable bartlett
                        bartlett,
                        bytestring,
                        optparse-applicative,
-                       keyring
+                       keyring,
+                       mtl
 
 test-suite bartlett-test
   type:                    exitcode-stdio-1.0
