@@ -27,8 +27,17 @@ matrix:
   # variable, such as using --stack-yaml to point to a different file.
   # Nightly builds are allowed to fail
   - env: BUILD=stack ARGS=""
-    compiler: ": #stack 8.0.1 OSX"
+    compiler: ": El Capitan"
     os: osx
+    osx_image: xcode8.2
+  - env BUILD=stack ARGS=""
+    compiler: ": Yosemite"
+    os: osx
+    osx_image: xcode7.3
+  - env BUILD=stack ARGS=""
+    compiler: ": Mavericks"
+    os: osx
+    osx_image: xcode6.4
 
   allow_failures:
   - env: BUILD=stack ARGS="--resolver nightly"
@@ -63,8 +72,10 @@ script:
 before_deploy:
 - |
   export BARTLETT_VERSION=$(grep version bartlett.cabal | head -1 | awk -F: '{ print $2 }' | tr -d '[:space:]')
+- |
+  export MACOS_VERSION="macOS_$(defaults read loginwindow SystemVersionStampAsString)"
 - stack clean && stack build --copy-bins && strip "${HOME}/.local/bin/bartlett"
-  && tar czvf  "bartlett-static-${BARTLETT_VERSION}.tar.gz" -C "${HOME}/.local/bin/" bartlett
+  && tar czvf  "bartlett-${BARTLETT_VERSION}-${MACOS_VERSION}.tar.gz" -C "${HOME}/.local/bin/" bartlett
 
 deploy:
   provider: releases
