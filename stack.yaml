@@ -42,10 +42,6 @@ packages:
       commit: 56d7176ba0e8860ab0abab3dfca9a218ab387da9
   extra-dep: true
 
-# Enable split-objs for dead code elimination (and smaller binaries!)
-build:
-  split-objs: true
-
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
