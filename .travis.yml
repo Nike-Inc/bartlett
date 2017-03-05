@@ -30,11 +30,11 @@ matrix:
     compiler: ": El Capitan"
     os: osx
     osx_image: xcode8.2
-  - env BUILD=stack ARGS=""
+  - env: BUILD=stack ARGS=""
     compiler: ": Yosemite"
     os: osx
     osx_image: xcode7.3
-  - env BUILD=stack ARGS=""
+  - env: BUILD=stack ARGS=""
     compiler: ": Mavericks"
     os: osx
     osx_image: xcode6.4
