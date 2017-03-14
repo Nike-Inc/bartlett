@@ -18,8 +18,6 @@ module Bartlett.Configuration (
   getStorePassword
 ) where
 
-import Prelude hiding (concat)
-
 import Bartlett.Util (toText)
 import Bartlett.Types
 

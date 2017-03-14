@@ -30,13 +30,14 @@ module Bartlett.Util (
   optionsBuilder
 )where
 
-import Prelude hiding (concat, null, dropWhile)
+import Prelude hiding (null, dropWhile)
 
 import Bartlett.Types
 
 import Control.Lens (set, (^.))
 import Data.Aeson (decode, Object)
 import Data.Aeson.Encode.Pretty (encodePretty)
+import Data.Monoid ((<>))
 import Data.ByteString.Lazy.Char8
 import Data.ByteString.Builder (toLazyByteString)
 import qualified Data.Text as T
@@ -52,7 +53,7 @@ setPath jenkins path =
 -- | Constructs a valid Jenkins API url.
 mkUrl :: JenkinsInstance -> JobPath -> ByteString -> JenkinsInstance
 mkUrl base path suffix =
-  setPath base $ concat [mkJobPath path, suffix]
+  setPath base (mkJobPath path <> suffix)
 
 -- | Given a slash-delimited path, return that same path interspersed with '/job/'.
 mkJobPath :: JobPath -> ByteString
