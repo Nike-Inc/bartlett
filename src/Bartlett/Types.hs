@@ -102,6 +102,7 @@ data Options = Options {
   cmd                :: Command
 } deriving (Show)
 
+-- | The Bartlett Monad which encompases a few useful Monad Transformers.
 newtype Bartlett a = Bartlett {
   runBartlett :: ReaderT Options IO a
 } deriving (Applicative, Functor, Monad, MonadIO, MonadReader Options)
