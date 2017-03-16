@@ -18,8 +18,11 @@ A simple Jenkins command line client to serve your needs.
     - [Querying Existing Jobs](#querying-existing-jobs)
     - [Triggering Job Builds](#triggering-job-builds)
     - [Managing Job Configurations](#managing-job-configurations)
+      - [Updating Existing Jobs](#updating-existing-jobs)
       - [Deleting Existing Jobs](#deleting-existing-jobs)
     - [Downloading Artifacts for a Given Job](#downloading-artifacts-for-a-given-job)
+    - [Getting Log Output for a Given Job](#getting-log-output-for-a-given-job)
+      - [Streaming Log Output for Recently Built Jobs](#streaming-log-output-for-recently-built-jobs)
     - [Configuring Profiles](#configuring-profiles)
       - [Supported Configuration Values](#supported-configuration-values)
         - [A note on password storage](#a-note-on-password-storage)
@@ -164,6 +167,7 @@ Available commands:
   build                    Trigger a build for the given job
   config                   Manage XML configurations for jobs
   artifact                 Download artifacts from jobs
+  log                      Print (or follow) log output for jobs
 
 Copyright (c) Nike, Inc. 2016-present
 ```
@@ -272,6 +276,8 @@ Enter password:
 </project>
 ```
 
+#### Updating Existing Jobs
+
 We can pipe the output of the previous command to a file, make some
 modifications, and then update the configuration with the following command:
 
@@ -319,6 +325,39 @@ artifact output directly to a file:
 bartlett --username my-user --jenkins https://my-jenkins.com \
   artifact /path/to/job my-artifact-id > my-artifact-id.txt
 Enter password:
+```
+
+### Getting Log Output for a Given Job
+
+Log output can be printed for a given job with the `log` sub-command.
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  log /path/to/job 42 # The job invocation to get logs for
+```
+
+Logs are printed to STDOUT and can be manipulated with standard UNIX tools. For
+example, let's say we only care that a job completed successfully. We can
+achieve this simple goal by piping log output to grep:
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  log /path/to/job 42 | grep SUCCESS
+Finished: SUCCESS
+```
+
+#### Streaming Log Output for Recently Built Jobs
+
+You may also stream log output for a long-running job by passing the `-f` or
+`--follow` flags to the `log` sub-command:
+
+```
+bartlett --username my-user --jenkins https://my-jenkins.com \
+  log /path/to/job --follow 42
+Job output...
+Job output...
+Job output...
+Job output...
 ```
 
 ### Configuring Profiles

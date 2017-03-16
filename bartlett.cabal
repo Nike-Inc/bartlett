@@ -22,7 +22,8 @@ library
                        Bartlett.Actions.Info,
                        Bartlett.Actions.Build,
                        Bartlett.Actions.Config,
-                       Bartlett.Actions.Artifact
+                       Bartlett.Actions.Artifact,
+                       Bartlett.Actions.Log
   ghc-options:
     -fwarn-tabs
     -fwarn-unused-imports
@@ -45,7 +46,9 @@ library
                        http-types,
                        http-client,
                        uri-bytestring,
-                       case-insensitive
+                       case-insensitive,
+                       mtl,
+                       transformers
 
 executable bartlett
   main-is:             app/Main.hs
@@ -62,7 +65,8 @@ executable bartlett
                        bartlett,
                        bytestring,
                        optparse-applicative,
-                       keyring
+                       keyring,
+                       mtl
 
 test-suite bartlett-test
   type:                    exitcode-stdio-1.0

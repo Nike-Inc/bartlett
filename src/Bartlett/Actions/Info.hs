@@ -17,7 +17,8 @@ import Bartlett.Types
 import Bartlett.Util (toPrettyJson, mkUrl)
 
 import Control.Lens (set, (^.), (&))
-import Data.Maybe (Maybe)
+import Control.Monad.Reader (asks, liftIO)
+import Data.Maybe (fromJust)
 import qualified Data.ByteString.Lazy.Char8 as BL
 import Network.Wreq (responseBody, defaults, auth)
 
@@ -29,13 +30,12 @@ import Network.Wreq (responseBody, defaults, auth)
 -- Jenkins over SSL.
 getInfo ::
   BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
-  -> JenkinsInstance         -- ^ The Jenkins instance to authenticate against.
   -> [JobPath]               -- ^ The jobs to get information from.
-  -> IO ()
-getInfo user base [] = return ()
-getInfo user base (path:paths) = do
-  resp <- execRequest Get reqOpts reqUri Nothing
-  BL.putStrLn . toPrettyJson $ resp ^. responseBody
-  getInfo user base paths
+  -> Bartlett ()
+getInfo user [] = return ()
+getInfo user (path:paths) = do
+  jenkins <- fromJust <$> asks jenkinsInstance
+  resp <- liftIO $ execRequest Get reqOpts (mkUrl jenkins path "/api/json") Nothing
+  liftIO $ BL.putStrLn . toPrettyJson $ resp ^. responseBody
+  getInfo user paths
     where reqOpts = defaults & set auth (getBasicAuth <$> user)
-          reqUri  = mkUrl base path "/api/json"

@@ -13,6 +13,7 @@ module Bartlett.Parsers where
 import Bartlett.Types
 
 import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, toStrict)
+import Data.Monoid ((<>))
 import URI.ByteString (URIRef, Absolute, parseURI, strictURIParserOptions)
 import Options.Applicative
 import Options.Applicative.Types (readerAsk)
@@ -75,7 +76,7 @@ parseJobParameters = option readerByteString $
 parseConfigFilePath :: Parser ConfigPath
 parseConfigFilePath = option str $
   short 'f' <> long "filepath" <> metavar "CONFIG_FILE_PATH" <>
-  help "Path to the job configuration to upload"
+  help "If present, the path to the job configuration to upload for an existing job."
 
 -- | Parse whether we should delete the given resource.
 parseDeleteFlag :: Parser DeleteFlag
@@ -106,6 +107,19 @@ parseArtifact = Artifact
   <$> argument readerByteString (metavar "JOB_PATH")
   <*> argument readerByteString (metavar "ARTIFACT_ID")
 
+-- | Parse whether we should follow log output for the given job.
+parseFollowFlag :: Parser FollowOutputFlag
+parseFollowFlag = switch $
+  short 'f' <> long "follow"
+  <> help "If present, follow log oputput for the current job"
+
+-- | Parse a Log sub-command.
+parseLog :: Parser Command
+parseLog = Log
+  <$> parseFollowFlag
+  <*> argument readerByteString (metavar "JOB_PATH")
+  <*> argument readerByteString (metavar "BUILD_NUMBER")
+
 -- | Parse a Command.
 parseCommand :: Parser Command
 parseCommand = subparser $
@@ -113,6 +127,7 @@ parseCommand = subparser $
   <> command "build" (parseBuild `withInfo` "Trigger a build for the given job")
   <> command "config" (parseConfig `withInfo` "Manage XML configurations for jobs")
   <> command "artifact" (parseArtifact `withInfo` "Download artifacts from jobs")
+  <> command "log" (parseLog `withInfo` "Print (or follow) log output for jobs")
 
 -- | Combinator for all command line options.
 parseOptions :: Parser Options

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric, GeneralizedNewtypeDeriving #-}
 
 {-|
 Module      : Types
@@ -21,6 +21,8 @@ module Bartlett.Types (
   ConfigPath,
   DeleteFlag,
   ArtifactId,
+  FollowOutputFlag,
+  BuildNumber,
   -- * User types
   BasicAuthUser(..),
   User(..),
@@ -29,7 +31,9 @@ module Bartlett.Types (
   Options(..),
   -- * Network Types
   StatusResponse(..),
-  RequestType(..)
+  RequestType(..),
+  -- * Bartlett
+  Bartlett(..)
 ) where
 
 import Data.Aeson (ToJSON, FromJSON)
@@ -37,6 +41,8 @@ import Data.ByteString.Lazy.Char8 (ByteString, toStrict)
 import GHC.Generics (Generic)
 import Network.Wreq (Auth, basicAuth)
 import URI.ByteString (URIRef, Absolute)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Reader (MonadReader, ReaderT)
 
 -- TODO use newtypes!! doesn't require boxing
 
@@ -59,6 +65,10 @@ type ConfigPath      = FilePath
 -- ^ The path to the job configuration to upload.
 type DeleteFlag      = Bool
 -- ^ Should we delete the current item?
+type FollowOutputFlag = Bool
+-- ^ Should we follow log output for the current job?
+type BuildNumber     = ByteString
+-- ^ The build number for the given job.
 
 -- | Defines methods for basic authentication
 class BasicAuthUser a where
@@ -80,10 +90,22 @@ data Command =
   | Build JobPath (Maybe JobParameters)            -- ^ Build the given job with the given options.
   | Config DeleteFlag [JobPath] (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
   | Artifact JobPath ArtifactId                    -- ^ Retrieve the given artifact from the given job.
+  | Log FollowOutputFlag JobPath BuildNumber       -- ^ Print the log output for a given job.
+  deriving (Show)
 
--- | Represents all available CLI options for 'Bartlett'.
-data Options =
-  Options (Maybe Username) (Maybe JenkinsInstance) (Maybe Profile) Bool Command
+-- | All available CLI options for 'Bartlett'.
+data Options = Options {
+  username           :: Maybe Username,
+  jenkinsInstance    :: Maybe JenkinsInstance,
+  profile            :: Maybe Profile,
+  refreshCredentials :: Bool,
+  cmd                :: Command
+} deriving (Show)
+
+-- | The Bartlett Monad which encompases a few useful Monad Transformers.
+newtype Bartlett a = Bartlett {
+  runBartlett :: ReaderT Options IO a
+} deriving (Applicative, Functor, Monad, MonadIO, MonadReader Options)
 
 -- | Wrapper around Wreq's 'Status' type.
 --
