@@ -14,15 +14,35 @@ module Bartlett.Actions.Log (
 
 import Bartlett.Network (execRequest)
 import Bartlett.Types
-import Bartlett.Util (mkUrl)
+import Bartlett.Util (mkUrl, toText)
 
-import Control.Lens (set, (^.), (&))
+import Control.Concurrent (threadDelay)
+import Control.Lens (set, (^.), (&), (^?))
 import Control.Monad.Reader (asks, liftIO)
-import Data.Maybe (fromJust)
+import Control.Monad (when, unless)
+import Data.Maybe (fromJust, isJust)
 import Data.Monoid ((<>))
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.Wreq (responseBody, defaults, auth, param)
+import qualified Data.Text as T
+import Network.Wreq (responseBody, responseHeader, defaults, auth, param)
 
+-- | Internal helper to recursively get logs from the given Jenkins instance.
+requestLogs ::
+  BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
+  -> JenkinsInstance         -- ^ The Jenkins instance to interact with.
+  -> FollowOutputFlag        -- ^ Whether to recursively fetch logs or not.
+  -> T.Text                  -- ^ The current offset for log output
+  -> Bartlett ()
+requestLogs user jenkins followFlag offset = do
+  resp <- liftIO $ execRequest Get reqOpts jenkins Nothing
+  unless (BL.null $ resp ^. responseBody) $
+    liftIO $ BL.putStr $ resp ^. responseBody
+  when (followFlag && isJust (resp ^? responseHeader "X-More-Data")) $ do
+   liftIO $ threadDelay 1000000
+   requestLogs user jenkins  followFlag (toText . BL.fromStrict $ resp ^. responseHeader "X-Text-Size")
+    where reqOpts = defaults & set auth (getBasicAuth <$> user) . set (param "start") [offset]
+
+-- | Fetch logs from the current Jenkins instance.
 getLogs ::
   BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
   -> FollowOutputFlag        -- ^ Whether to follow log output or not.
@@ -31,8 +51,6 @@ getLogs ::
   -> Bartlett ()
 getLogs user followFlag path buildNumber = do
   jenkins <- fromJust <$> asks jenkinsInstance
-  -- TODO make this a bit cleaner
-  resp <- liftIO $ execRequest Get reqOpts (mkUrl jenkins path $ "/" <> buildNumber <> "/logText/progressiveText") Nothing
-  liftIO $ BL.putStrLn $ resp ^. responseBody
-  where reqOpts = defaults & set auth (getBasicAuth <$> user)
-                    . set (param "start") ["0"]
+  let inst = mkUrl jenkins path $ "/" <> buildNumber <> "/logText/progressiveText"
+  requestLogs user inst followFlag "0"
+  return ()
