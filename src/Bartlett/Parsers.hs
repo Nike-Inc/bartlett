@@ -10,13 +10,14 @@ Parsers used to extract command line options at invocation.
 -}
 module Bartlett.Parsers where
 
-import Bartlett.Types
+import           Bartlett.Types
 
-import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, toStrict)
-import Data.Monoid ((<>))
-import URI.ByteString (URIRef, Absolute, parseURI, strictURIParserOptions)
-import Options.Applicative
-import Options.Applicative.Types (readerAsk)
+import           Data.ByteString.Lazy.Char8 (ByteString, pack, toStrict, unpack)
+import           Data.Monoid                ((<>))
+import           Options.Applicative
+import           Options.Applicative.Types  (readerAsk)
+import           URI.ByteString             (Absolute, URIRef, parseURI,
+                                             strictURIParserOptions)
 
 -- | Parse a command line option as a "ByteString".
 readerByteString :: ReadM ByteString

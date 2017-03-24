@@ -1,19 +1,19 @@
 module Bartlett.UtilSpec where
 
-import Bartlett.Types
-import Bartlett.Util
+import           Bartlett.Types
+import           Bartlett.Util
 
-import Control.Exception (evaluate)
-import Control.Lens
-import Data.Aeson
-import Data.ByteString.Lazy.Char8
-import GHC.Exts
-import qualified Network.Wreq as W
-import Network.HTTP.Types.Status hiding (statusCode, statusMessage)
-import Test.Hspec
+import           Control.Exception          (evaluate)
+import           Control.Lens
+import           Data.Aeson
+import           Data.ByteString.Lazy.Char8
+import           GHC.Exts
+import           Network.HTTP.Types.Status  hiding (statusCode, statusMessage)
+import qualified Network.Wreq               as W
+import           Test.Hspec
 
-import URI.ByteString
-import Data.Either.Unwrap
+import           Data.Either.Unwrap
+import           URI.ByteString
 
 -- | Helper to create instances of 'JenkinsInstance'.
 jenkins :: Bool -> JenkinsInstance

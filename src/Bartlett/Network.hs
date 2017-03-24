@@ -19,20 +19,22 @@ module Bartlett.Network (
   recoverableErrorHandler
 )where
 
-import qualified Bartlett.Util as BU
-import           Bartlett.Types (RequestType(..), JenkinsInstance)
+import           Bartlett.Types             (JenkinsInstance, RequestType (..))
+import qualified Bartlett.Util              as BU
 
-import qualified Control.Exception as E
-import           Control.Lens ((.~), (^?), (&))
-import           Data.Aeson.Encode.Pretty (encodePretty)
-import           Data.Aeson.Lens (key, _String)
-import qualified Data.CaseInsensitive as CI
-import           Data.ByteString.Lazy.Char8 (ByteString, unpack, toStrict, empty)
-import           Data.Maybe (fromMaybe)
-import qualified Network.HTTP.Client as NHC
-import           System.Exit (die)
-import           Network.Wreq (Options, Response, param, responseBody, header)
-import qualified Network.Wreq.Session as S
+import qualified Control.Exception          as E
+import           Control.Lens               ((&), (.~), (^?))
+import           Data.Aeson.Encode.Pretty   (encodePretty)
+import           Data.Aeson.Lens            (key, _String)
+import           Data.ByteString.Lazy.Char8 (ByteString, empty, toStrict,
+                                             unpack)
+import qualified Data.CaseInsensitive       as CI
+import           Data.Maybe                 (fromMaybe)
+import qualified Network.HTTP.Client        as NHC
+import           Network.Wreq               (Options, Response, header, param,
+                                             responseBody)
+import qualified Network.Wreq.Session       as S
+import           System.Exit                (die)
 
 
 -- | Attempt to request a CSRF token from the Jenkins server.

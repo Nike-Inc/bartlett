@@ -1,9 +1,9 @@
 module Bartlett.Actions.InfoSpec where
 
-import Bartlett.Actions.Info
+import           Bartlett.Actions.Info
 
-import Data.ByteString.Lazy.Char8
-import Test.Hspec
+import           Data.ByteString.Lazy.Char8
+import           Test.Hspec
 
 -- TODO figure out how to mock some HTTP request action
 --      this might be a good resource: https://github.com/bos/wreq/blob/master/tests/UnitTests.hs

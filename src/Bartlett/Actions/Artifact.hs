@@ -12,16 +12,16 @@ module Bartlett.Actions.Artifact (
   getArtifact
 ) where
 
-import Bartlett.Network (execRequest)
-import Bartlett.Types
-import Bartlett.Util (mkUrl)
+import           Bartlett.Network           (execRequest)
+import           Bartlett.Types
+import           Bartlett.Util              (mkUrl)
 
-import Control.Lens (set, (^.), (&))
-import Control.Monad.Reader (asks, liftIO)
-import Data.Maybe (fromJust)
-import Data.Monoid ((<>))
+import           Control.Lens               (set, (&), (^.))
+import           Control.Monad.Reader       (asks, liftIO)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.Wreq (responseBody, defaults, auth)
+import           Data.Maybe                 (fromJust)
+import           Data.Monoid                ((<>))
+import           Network.Wreq               (auth, defaults, responseBody)
 
 -- | Download an artifact from the provided job.
 getArtifact ::
