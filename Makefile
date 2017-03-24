@@ -1,3 +1,5 @@
+.PHONY: hlint_install, hlint, hlint_apply_refact, hlint_refactor
+.PHONY: stylish_haskell_install, stylish_haskell_check
 
 build: clean
 	@stack install
@@ -14,3 +16,24 @@ package-bin: static-build
 
 clean:
 	@stack clean
+
+# The following tasks cribbed from: https://lwm.github.io/haskell-static/
+hlint_install:
+	@stack install hlint
+
+hlint: hlint_install
+	@hlint test/ src/ app/
+
+hlint_apply_refact: hlint_install
+	@stack install apply_refact
+
+HLINT=hlint --refactor --refactor-options -i {} \;
+hlint_refactor: hlint-apply-refact
+	@find src/ test/ app/ -name "*.hs" -exec $(HLINT)
+
+stylish_haskell_install:
+	@stack install stylish-haskell
+
+STYLISH=stylish-haskell -i {} \;
+stylish_haskell_check: stylish_haskell_install
+	@find test/ app/ src/ -name "*.hs" -exec $(STYLISH) && git diff --exit-code
