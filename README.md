@@ -147,13 +147,15 @@ You can get a list of available options with the `-h` flag:
 
 ```
 $ bartlett -h
-bartlett - the Jenkins command-line tool to serve your needs.
+bartlett 1.6.0 - the Jenkins command-line tool to serve your needs.
 
-Usage: bartlett [-u|--username USERNAME] [-j|--jenkins JENKINS_INSTANCE]
-                [-p|--profile PROFILE_NAME] [--refresh-credentials] COMMAND
+Usage: bartlett [--version] [-u|--username USERNAME]
+                [-j|--jenkins JENKINS_INSTANCE] [-p|--profile PROFILE_NAME]
+                [--refresh-credentials] COMMAND
 
 Available options:
   -h,--help                Show this help text
+  --version                Print the current version and exit.
   -u,--username USERNAME   The user to authenticate with
   -j,--jenkins JENKINS_INSTANCE
                            The Jenkins instance to interact with
