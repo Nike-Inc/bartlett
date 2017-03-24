@@ -14,10 +14,16 @@ import           Bartlett.Types
 
 import           Data.ByteString.Lazy.Char8 (ByteString, pack, toStrict, unpack)
 import           Data.Monoid                ((<>))
+import           Data.Version               (showVersion)
 import           Options.Applicative
 import           Options.Applicative.Types  (readerAsk)
+import qualified Paths_bartlett
 import           URI.ByteString             (Absolute, URIRef, parseURI,
                                              strictURIParserOptions)
+
+-- | The current bartlett version
+bartlettVersion :: String
+bartlettVersion = "bartlett " <> showVersion Paths_bartlett.version
 
 -- | Parse a command line option as a "ByteString".
 readerByteString :: ReadM ByteString
@@ -37,11 +43,17 @@ readerUriRef = do
 
 -- | Wrap parsers with doc strings and metadata.
 withInfo :: Parser a -> ByteString -> ParserInfo a
-withInfo opts desc = info (helper <*> opts)
+withInfo opts desc = info (helper <*> parseVersion <*> opts)
   (fullDesc
   <> progDesc (unpack desc)
-  <> header "bartlett - the Jenkins command-line tool to serve your needs."
+  <> header (bartlettVersion <> " - the Jenkins command-line tool to serve your needs.")
   <> footer "Copyright (c) Nike, Inc. 2016-present")
+
+-- | Parse a version flag.
+parseVersion :: Parser (a -> a)
+parseVersion = infoOption bartlettVersion $
+  long "version"
+  <> help "Print the current version and exit."
 
 -- | Parse a credentials flag.
 parseRefreshCredentials :: Parser Bool

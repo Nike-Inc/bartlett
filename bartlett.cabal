@@ -24,6 +24,7 @@ library
                        Bartlett.Actions.Config,
                        Bartlett.Actions.Artifact,
                        Bartlett.Actions.Log
+  other-modules:       Paths_bartlett
   ghc-options:
     -fwarn-tabs
     -fwarn-unused-imports
