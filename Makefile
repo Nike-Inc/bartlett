@@ -25,10 +25,10 @@ hlint: hlint_install
 	@hlint test/ src/ app/
 
 hlint_apply_refact: hlint_install
-	@stack install apply_refact
+	@stack install apply-refact
 
 HLINT=hlint --refactor --refactor-options -i {} \;
-hlint_refactor: hlint-apply-refact
+hlint_refactor: hlint_apply_refact
 	@find src/ test/ app/ -name "*.hs" -exec $(HLINT)
 
 stylish_haskell_install:
