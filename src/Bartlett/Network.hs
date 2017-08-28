@@ -49,7 +49,9 @@ requestCSRFToken sess opts jenkins = do
   case resp of
     Left _ ->
       return (Nothing, Nothing)
-    Right r ->
+    Right r -> do
+      print (BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumbRequestField") . _String),
+         BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumb") . _String))
       return
         (BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumbRequestField") . _String),
          BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumb") . _String))
@@ -57,9 +59,9 @@ requestCSRFToken sess opts jenkins = do
         reqOpts = opts & param "xpath" .~ [BU.toText "concat(//crumbRequestField,\":\",//crumb)"]
 
 -- | Construct a valid header from a potential CSRF response.
-consCSRFHeader :: IO (Maybe ByteString, Maybe ByteString) -> IO (Options -> Options)
-consCSRFHeader ioCrumb = ioCrumb >>= \ (field, crumb) ->
-  return $ header (CI.mk . toStrict . fromMaybe empty $ field) .~ [(toStrict . fromMaybe empty) crumb]
+consCSRFHeader :: (ByteString, ByteString) -> (Options -> Options)
+consCSRFHeader (field, crumb) =
+  header (CI.mk . toStrict $ field) .~ [toStrict crumb]
 
 
 -- | General request handler that provides basic error handling.
@@ -73,12 +75,19 @@ execRequest requestType reqOpts reqUrl postBody =
   S.withAPISession $ \session ->
     case requestType of
       Post -> do
-        csrfCrumb <- consCSRFHeader $ requestCSRFToken session reqOpts reqUrl
-        postSession reqUrl (reqOpts & csrfCrumb)
+        opts <- getOpts
+        postSession reqUrl opts
           `E.catch`
-            recoverableErrorHandler (postSession (BU.withForcedSSL reqUrl) (reqOpts & csrfCrumb))
-              where fileToUpload = fromMaybe "" postBody :: ByteString
-                    postSession url opts = S.postWith opts session (BU.uriToString url) fileToUpload
+            recoverableErrorHandler (postSession (BU.withForcedSSL reqUrl) opts)
+        where fileToUpload = fromMaybe "" postBody :: ByteString
+              postSession url opts = S.postWith opts session (BU.uriToString url) fileToUpload
+              getOpts = do
+                csrfCrumb <- requestCSRFToken session reqOpts reqUrl
+                case csrfCrumb of
+                  (Nothing, Nothing) ->
+                    return reqOpts
+                  (Just field, Just crumb) ->
+                    return $ reqOpts & consCSRFHeader (field, crumb)
       Get ->
         getSession reqUrl
           `E.catch`
