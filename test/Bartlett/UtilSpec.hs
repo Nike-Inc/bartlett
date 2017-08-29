@@ -23,8 +23,7 @@ jenkins withSSL =
                    then "https://example.com"
                    else "http://example.com"
 
-spec :: Spec
-spec =
+spec_util =
   describe "Util tests" $ do
 
     describe "mkUrl" $ do

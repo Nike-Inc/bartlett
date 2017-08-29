@@ -8,9 +8,7 @@ import Test.Hspec
 -- TODO figure out how to mock some HTTP request action
 --      this might be a good resource: https://github.com/bos/wreq/blob/master/tests/UnitTests.hs
 
-spec :: Spec
-spec = describe "Info tests" $
-
+spec_info = describe "Info tests" $
     describe "getInfo" $
       it "should make a request to jenkins" $
         1 `shouldBe` 1

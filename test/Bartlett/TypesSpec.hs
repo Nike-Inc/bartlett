@@ -7,8 +7,7 @@ import Bartlett.Types
 import Network.Wreq   hiding (statusCode, statusMessage)
 import Test.Hspec
 
-spec :: Spec
-spec =
+spec_types =
   describe "Type tests" $ do
 
     describe "getBasicAuth for BasicAuthUser" $
