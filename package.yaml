@@ -1,0 +1,84 @@
+name: bartlett
+version: '1.6.0'
+synopsis: The Jenkins command-line tool to serve your needs.
+description: Please see README.md
+category: CLI
+author: Fernando Freire
+maintainer: fernando.freire@nike.com
+copyright: 2016-Present Nike, Inc.
+license: BSD3
+github: Nike-inc/bartlett
+default-extensions:
+  - OverloadedStrings
+dependencies:
+  - base >=4.7 && <5
+  - bytestring
+library:
+  source-dirs: src
+  ghc-options:
+    - -Wall
+    - -fwarn-tabs
+    - -fwarn-unused-imports
+    - -fwarn-missing-signatures
+    - -fwarn-name-shadowing
+    - -fwarn-incomplete-patterns
+  exposed-modules:
+    - Bartlett.Types
+    - Bartlett.Util
+    - Bartlett.Parsers
+    - Bartlett.Network
+    - Bartlett.Configuration
+    - Bartlett.Actions.Info
+    - Bartlett.Actions.Build
+    - Bartlett.Actions.Config
+    - Bartlett.Actions.Artifact
+    - Bartlett.Actions.Log
+  dependencies:
+    - wreq
+    - configurator
+    - filepath
+    - lens
+    - optparse-applicative
+    - aeson
+    - aeson-pretty
+    - lens-aeson
+    - text
+    - http-types
+    - http-client
+    - uri-bytestring
+    - case-insensitive
+    - mtl
+    - transformers
+executables:
+  bartlett:
+    main: app/Main.hs
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    ld-options:
+      - -optl-static
+      - -optl-pthread
+    dependencies:
+      - bartlett
+      - optparse-applicative
+      - keyring
+      - mtl
+tests:
+  bartlett-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - hscolour
+      - bartlett
+      - hspec
+      - aeson
+      - wreq
+      - http-types
+      - lens
+      - uri-bytestring
+      - either-unwrap
