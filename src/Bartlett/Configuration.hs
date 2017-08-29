@@ -52,7 +52,7 @@ getJenkinsInstance cfg = do
       return Nothing
     Just inst ->
       case parseURI strictURIParserOptions (toStrict inst) of
-        Left err ->
+        Left _ ->
           return Nothing
         Right i ->
           return $ Just i

@@ -26,8 +26,7 @@ import qualified Control.Exception          as E
 import           Control.Lens               ((&), (.~), (^?))
 import           Data.Aeson.Encode.Pretty   (encodePretty)
 import           Data.Aeson.Lens            (key, _String)
-import           Data.ByteString.Lazy.Char8 (ByteString, empty, toStrict,
-                                             unpack)
+import           Data.ByteString.Lazy.Char8 (ByteString, toStrict, unpack)
 import qualified Data.CaseInsensitive       as CI
 import           Data.Maybe                 (fromMaybe)
 import qualified Network.HTTP.Client        as NHC
@@ -82,10 +81,10 @@ execRequest requestType reqOpts reqUrl postBody =
               getOpts = do
                 csrfCrumb <- requestCSRFToken session reqOpts reqUrl
                 case csrfCrumb of
-                  (Nothing, Nothing) ->
-                    return reqOpts
                   (Just field, Just crumb) ->
                     return $ reqOpts & consCSRFHeader (field, crumb)
+                  _ ->
+                    return reqOpts
       Get ->
         getSession reqUrl
           `E.catch`

@@ -2,10 +2,10 @@
 
 module Bartlett.TypesSpec where
 
-import           Bartlett.Types
+import Bartlett.Types
 
-import           Network.Wreq   hiding (statusCode, statusMessage)
-import           Test.Hspec
+import Network.Wreq   hiding (statusCode, statusMessage)
+import Test.Hspec
 
 spec :: Spec
 spec =

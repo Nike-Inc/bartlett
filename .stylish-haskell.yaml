@@ -6,7 +6,7 @@
 # once (if needed). Each file is processed by these steps in the given order.
 steps:
   - imports:
-      align: global
+      align: file
       list_align: after_alias
       long_list_align: inline
       list_padding: 4

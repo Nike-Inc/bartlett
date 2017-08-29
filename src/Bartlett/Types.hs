@@ -37,13 +37,13 @@ module Bartlett.Types (
   Bartlett(..)
 ) where
 
-import           Control.Monad.IO.Class     (MonadIO)
-import           Control.Monad.Reader       (MonadReader, ReaderT)
-import           Data.Aeson                 (FromJSON, ToJSON)
-import           Data.ByteString.Lazy.Char8 (ByteString, toStrict)
-import           GHC.Generics               (Generic)
-import           Network.Wreq               (Auth, basicAuth)
-import           URI.ByteString             (Absolute, URIRef)
+import Control.Monad.IO.Class     (MonadIO)
+import Control.Monad.Reader       (MonadReader, ReaderT)
+import Data.Aeson                 (FromJSON, ToJSON)
+import Data.ByteString.Lazy.Char8 (ByteString, toStrict)
+import GHC.Generics               (Generic)
+import Network.Wreq               (Auth, basicAuth)
+import URI.ByteString             (Absolute, URIRef)
 
 -- TODO use newtypes!! doesn't require boxing
 

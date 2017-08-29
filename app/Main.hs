@@ -8,6 +8,7 @@ import qualified Bartlett.Actions.Log       as AL
 import qualified Bartlett.Configuration     as C
 import           Bartlett.Parsers           (parseOptions, withInfo)
 import           Bartlett.Types
+
 import           Control.Exception          (bracket_)
 import           Control.Monad.Reader       (ask, asks, liftIO, local,
                                              runReaderT)
