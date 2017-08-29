@@ -88,7 +88,7 @@ instance BasicAuthUser User where
 -- | Represents all available sub-commands for 'Bartlett'.
 data Command =
   Info [JobPath]                                   -- ^ Retrieve information for the given job.
-  | Build JobPath (Maybe JobParameters)            -- ^ Build the given job with the given options.
+  | Build FollowOutputFlag JobPath (Maybe JobParameters)            -- ^ Build the given job with the given options.
   | Config DeleteFlag [JobPath] (Maybe ConfigPath) -- ^ Retrieve and upload job configurations.
   | Artifact JobPath ArtifactId                    -- ^ Retrieve the given artifact from the given job.
   | Log FollowOutputFlag JobPath BuildNumber       -- ^ Print the log output for a given job.

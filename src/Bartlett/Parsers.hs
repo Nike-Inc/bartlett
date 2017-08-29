@@ -104,7 +104,8 @@ parseInfo = Info <$> some (argument readerByteString (metavar "JOB_PATHS..."))
 -- | Parse a Build sub-command.
 parseBuild :: Parser Command
 parseBuild = Build
-  <$> argument readerByteString (metavar "JOB_PATH")
+  <$> parseFollowFlag
+  <*> argument readerByteString (metavar "JOB_PATH")
   <*> optional parseJobParameters
 
 -- | Parse a Config sub-command.

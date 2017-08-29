@@ -112,8 +112,8 @@ run = do
     case command of
       Info jobPaths ->
         AI.getInfo usr jobPaths
-      Build jobPath jobParameters ->
-        AB.postBuild usr jobPath jobParameters
+      Build followFlag jobPath jobParameters ->
+        AB.postBuild usr followFlag jobPath jobParameters
       Artifact jobPath artifactId ->
         AA.getArtifact usr jobPath artifactId
       Log followFlag jobPath buildNumber ->

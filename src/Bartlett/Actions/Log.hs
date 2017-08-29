@@ -9,7 +9,8 @@ Stability   : stable
 Methods for printing or following log output.
 -}
 module Bartlett.Actions.Log (
-  getLogs
+  getLogs,
+  requestLogs
 ) where
 
 import           Bartlett.Network           (execRequest)
