@@ -30,21 +30,22 @@ module Bartlett.Util (
   optionsBuilder
 )where
 
-import Prelude hiding (null, dropWhile)
+import           Prelude                    hiding (dropWhile, null)
 
-import Bartlett.Types
+import           Bartlett.Types
 
-import Control.Lens (set, (^.))
-import Data.Aeson (decode, Object)
-import Data.Aeson.Encode.Pretty (encodePretty)
-import Data.Monoid ((<>))
-import Data.ByteString.Lazy.Char8
-import Data.ByteString.Builder (toLazyByteString)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
-import qualified Network.Wreq as W
-import Network.HTTP.Types.Status
-import URI.ByteString (pathL, uriSchemeL, schemeBSL, serializeURIRef)
+import           Control.Lens               (set, (^.))
+import           Data.Aeson                 (Object, decode)
+import           Data.Aeson.Encode.Pretty   (encodePretty)
+import           Data.ByteString.Builder    (toLazyByteString)
+import           Data.ByteString.Lazy.Char8
+import           Data.Monoid                ((<>))
+import qualified Data.Text                  as T
+import qualified Data.Text.Encoding         as TE
+import           Network.HTTP.Types.Status
+import qualified Network.Wreq               as W
+import           URI.ByteString             (pathL, schemeBSL, serializeURIRef,
+                                             uriSchemeL)
 
 setPath :: JenkinsInstance -> ByteString -> JenkinsInstance
 setPath jenkins path =

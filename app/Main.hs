@@ -1,24 +1,25 @@
 module Main where
 
-import Prelude hiding (putStr)
-
+import qualified Bartlett.Actions.Artifact  as AA
+import qualified Bartlett.Actions.Build     as AB
+import qualified Bartlett.Actions.Config    as AC
+import qualified Bartlett.Actions.Info      as AI
+import qualified Bartlett.Actions.Log       as AL
+import qualified Bartlett.Configuration     as C
+import           Bartlett.Parsers           (parseOptions, withInfo)
 import           Bartlett.Types
-import           Bartlett.Parsers (parseOptions, withInfo)
-import qualified Bartlett.Configuration  as C
-import qualified Bartlett.Actions.Info   as AI
-import qualified Bartlett.Actions.Build  as AB
-import qualified Bartlett.Actions.Config as AC
-import qualified Bartlett.Actions.Artifact as AA
-import qualified Bartlett.Actions.Log as AL
 
-import Control.Exception (bracket_)
-import Control.Monad.Reader (local, liftIO, ask, asks, runReaderT)
-import Data.ByteString.Lazy.Char8 (ByteString, pack, unpack, hPutStr)
-import Data.Maybe (fromMaybe)
-import Options.Applicative
-import System.Exit (die)
-import System.IO (hFlush, stdout, stdin, stderr, hSetEcho, hGetEcho, hPutChar)
-import qualified System.Keyring as SK
+import           Control.Exception          (bracket_)
+import           Control.Monad.Reader       (ask, asks, liftIO, local,
+                                             runReaderT)
+import           Data.ByteString.Lazy.Char8 (ByteString, hPutStr, pack, unpack)
+import           Data.Maybe                 (fromMaybe)
+import           Options.Applicative
+import           Prelude                    hiding (putStr)
+import           System.Exit                (die)
+import           System.IO                  (hFlush, hGetEcho, hPutChar,
+                                             hSetEcho, stderr, stdin, stdout)
+import qualified System.Keyring             as SK
 
 -- | Wrapper determining if the given action should be echoed to stdout.
 withEcho :: Bool -> IO a -> IO a

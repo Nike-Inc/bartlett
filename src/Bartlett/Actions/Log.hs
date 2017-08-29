@@ -12,19 +12,20 @@ module Bartlett.Actions.Log (
   getLogs
 ) where
 
-import Bartlett.Network (execRequest)
-import Bartlett.Types
-import Bartlett.Util (mkUrl, toText)
+import           Bartlett.Network           (execRequest)
+import           Bartlett.Types
+import           Bartlett.Util              (mkUrl, toText)
 
-import Control.Concurrent (threadDelay)
-import Control.Lens (set, (^.), (&), (^?))
-import Control.Monad.Reader (asks, liftIO)
-import Control.Monad (when, unless)
-import Data.Maybe (fromJust, isJust)
-import Data.Monoid ((<>))
+import           Control.Concurrent         (threadDelay)
+import           Control.Lens               (set, (&), (^.), (^?))
+import           Control.Monad              (unless, when)
+import           Control.Monad.Reader       (asks, liftIO)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Data.Text as T
-import Network.Wreq (responseBody, responseHeader, defaults, auth, param)
+import           Data.Maybe                 (fromJust, isJust)
+import           Data.Monoid                ((<>))
+import qualified Data.Text                  as T
+import           Network.Wreq               (auth, defaults, param,
+                                             responseBody, responseHeader)
 
 -- | Internal helper to recursively get logs from the given Jenkins instance.
 requestLogs ::

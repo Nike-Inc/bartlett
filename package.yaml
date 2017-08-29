@@ -1,0 +1,88 @@
+name: bartlett
+version: '1.6.0'
+synopsis: The Jenkins command-line tool to serve your needs.
+description: Please see README.md
+category: CLI
+author: Fernando Freire
+maintainer: fernando.freire@nike.com
+copyright: 2016-Present Nike, Inc.
+license: BSD3
+github: Nike-inc/bartlett
+default-extensions:
+  - OverloadedStrings
+dependencies:
+  - base >=4.7 && <5
+  - bytestring
+library:
+  source-dirs: src
+  ghc-options:
+    - -Wall
+    - -fwarn-tabs
+    - -fwarn-unused-imports
+    - -fwarn-missing-signatures
+    - -fwarn-name-shadowing
+    - -fwarn-incomplete-patterns
+  exposed-modules:
+    - Bartlett.Types
+    - Bartlett.Util
+    - Bartlett.Parsers
+    - Bartlett.Network
+    - Bartlett.Configuration
+    - Bartlett.Actions.Info
+    - Bartlett.Actions.Build
+    - Bartlett.Actions.Config
+    - Bartlett.Actions.Artifact
+    - Bartlett.Actions.Log
+  dependencies:
+    - aeson
+    - aeson-pretty
+    - case-insensitive
+    - configurator
+    - filepath
+    - http-client
+    - http-types
+    - lens
+    - lens-aeson
+    - mtl
+    - optparse-applicative
+    - text
+    - transformers
+    - uri-bytestring
+    - wreq
+executables:
+  bartlett:
+    main: app/Main.hs
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    ld-options:
+      - -optl-static
+      - -optl-pthread
+    dependencies:
+      - bartlett
+      - keyring
+      - mtl
+      - optparse-applicative
+tests:
+  bartlett-test:
+    main: Tasty.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - aeson
+      - bartlett
+      - either-unwrap
+      - hspec
+      - http-types
+      - lens
+      - smallcheck
+      - tasty
+      - tasty-discover
+      - tasty-hspec
+      - tasty-smallcheck
+      - uri-bytestring
+      - wreq

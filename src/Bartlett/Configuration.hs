@@ -18,14 +18,14 @@ module Bartlett.Configuration (
   getStorePassword
 ) where
 
-import Bartlett.Util (toText)
-import Bartlett.Types
+import           Bartlett.Types
+import           Bartlett.Util              (toText)
 
-import qualified Data.Configurator as C
-import Data.ByteString.Lazy.Char8 (toStrict)
-import Data.Configurator.Types
-import System.FilePath ((</>))
-import URI.ByteString (parseURI, strictURIParserOptions)
+import           Data.ByteString.Lazy.Char8 (toStrict)
+import qualified Data.Configurator          as C
+import           Data.Configurator.Types
+import           System.FilePath            ((</>))
+import           URI.ByteString             (parseURI, strictURIParserOptions)
 
 -- | Default config file location
 defaultConfigLoc :: FilePath
@@ -52,7 +52,7 @@ getJenkinsInstance cfg = do
       return Nothing
     Just inst ->
       case parseURI strictURIParserOptions (toStrict inst) of
-        Left err ->
+        Left _ ->
           return Nothing
         Right i ->
           return $ Just i

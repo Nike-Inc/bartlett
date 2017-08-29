@@ -1,15 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 module ReplSugar where
 
-import Control.Lens
-import Bartlett.Types
-import Bartlett.Util
-import Bartlett.Configuration
-import Bartlett.Network
-import Data.Maybe
-import Data.ByteString.Lazy.Char8
-import qualified Network.Wreq as W
-import qualified Network.Wreq.Session as S
+import           Bartlett.Configuration
+import           Bartlett.Network
+import           Bartlett.Types
+import           Bartlett.Util
+import           Control.Lens
+import           Data.ByteString.Lazy.Char8
+import           Data.Maybe
+import qualified Network.Wreq               as W
+import qualified Network.Wreq.Session       as S
 
 -- | Docker Jenkins user.
 usr :: User

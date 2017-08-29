@@ -10,16 +10,17 @@ Methods for executing config requests against Jenkins.
 -}
 module Bartlett.Actions.Config where
 
-import Bartlett.Network (execRequest)
-import Bartlett.Types
-import Bartlett.Util (toResponseStatus, mkUrl)
+import           Bartlett.Network           (execRequest)
+import           Bartlett.Types
+import           Bartlett.Util              (mkUrl, toResponseStatus)
 
-import Control.Lens (set, (^.), (&))
-import Data.Maybe (Maybe, fromJust)
-import Data.Aeson.Encode.Pretty (encodePretty)
+import           Control.Lens               (set, (&), (^.))
+import           Control.Monad.Reader       (asks, liftIO)
+import           Data.Aeson.Encode.Pretty   (encodePretty)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.Wreq (responseStatus, responseBody, defaults, auth)
-import Control.Monad.Reader (liftIO, asks)
+import           Data.Maybe                 (Maybe, fromJust)
+import           Network.Wreq               (auth, defaults, responseBody,
+                                             responseStatus)
 
 -- | Construct a URL to interact with Job configurations.
 configUri :: JenkinsInstance -> JobPath -> JenkinsInstance

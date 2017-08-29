@@ -12,16 +12,16 @@ module Bartlett.Actions.Build (
   postBuild
 ) where
 
-import Bartlett.Network (execRequest)
-import Bartlett.Types
-import qualified Bartlett.Util as BU
+import           Bartlett.Network           (execRequest)
+import           Bartlett.Types
+import qualified Bartlett.Util              as BU
 
-import Control.Lens (set, (^.), (&))
-import Control.Monad.Reader (asks, liftIO)
-import Data.Maybe (fromJust)
-import Data.Aeson.Encode.Pretty (encodePretty)
+import           Control.Lens               (set, (&), (^.))
+import           Control.Monad.Reader       (asks, liftIO)
+import           Data.Aeson.Encode.Pretty   (encodePretty)
 import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.Wreq (Options, responseStatus, auth)
+import           Data.Maybe                 (fromJust)
+import           Network.Wreq               (Options, auth, responseStatus)
 
 
 -- | Parses and determines type of job to trigger based on supplied parameters.
