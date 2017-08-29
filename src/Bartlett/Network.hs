@@ -49,9 +49,7 @@ requestCSRFToken sess opts jenkins = do
   case resp of
     Left _ ->
       return (Nothing, Nothing)
-    Right r -> do
-      print (BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumbRequestField") . _String),
-         BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumb") . _String))
+    Right r ->
       return
         (BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumbRequestField") . _String),
          BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumb") . _String))
