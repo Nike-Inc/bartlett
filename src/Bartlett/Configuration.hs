@@ -19,7 +19,6 @@ module Bartlett.Configuration (
 ) where
 
 import           Bartlett.Types
-import           Bartlett.Util              (toText)
 
 import           Data.ByteString.Lazy.Char8 (toStrict)
 import qualified Data.Configurator          as C
@@ -36,17 +35,17 @@ defaultConfigLoc = "$(HOME)" </> ".bartlett.cfg"
 --   Returns an empty configuration if it could not load the default.
 getConfiguration :: Profile -> IO Config
 getConfiguration p =
-  C.subconfig (toText p) <$> C.load [Optional defaultConfigLoc]
+  C.subconfig p <$> C.load [Optional defaultConfigLoc]
 
 -- | Retrieve the username for the given profile.
 getUsername :: Config -> IO (Maybe Username)
 getUsername cfg =
-  C.lookup cfg (toText "username")
+  C.lookup cfg "username"
 
 -- | Retrieve the Jenkins instance for the given profile.
 getJenkinsInstance :: Config -> IO (Maybe JenkinsInstance)
 getJenkinsInstance cfg = do
-  ioInst <- C.lookup cfg (toText "jenkins_instance")
+  ioInst <- C.lookup cfg "jenkins_instance"
   case ioInst of
     Nothing ->
       return Nothing
@@ -60,5 +59,5 @@ getJenkinsInstance cfg = do
 -- | Get the value determining whether the user's password should be stored.
 getStorePassword :: Config -> IO (Maybe Bool)
 getStorePassword cfg =
-  C.lookup cfg (toText "store_password")
+  C.lookup cfg "store_password"
 

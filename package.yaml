@@ -13,6 +13,7 @@ default-extensions:
 dependencies:
   - base >=4.7 && <5
   - bytestring
+
 library:
   source-dirs: src
   ghc-options:
@@ -49,6 +50,7 @@ library:
     - transformers
     - uri-bytestring
     - wreq
+
 executables:
   bartlett:
     main: app/Main.hs
@@ -64,6 +66,8 @@ executables:
       - keyring
       - mtl
       - optparse-applicative
+      - text
+
 tests:
   bartlett-test:
     main: Tasty.hs

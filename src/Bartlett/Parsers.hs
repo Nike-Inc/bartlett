@@ -12,6 +12,8 @@ module Bartlett.Parsers where
 
 import           Bartlett.Types
 
+import Data.Text (Text)
+import qualified Data.Text as T
 import           Data.ByteString.Lazy.Char8 (ByteString, pack, toStrict, unpack)
 import           Data.Monoid                ((<>))
 import           Data.Version               (showVersion)
@@ -30,6 +32,11 @@ readerByteString :: ReadM ByteString
 readerByteString = do
   s <- readerAsk
   return $ pack s
+
+readerText :: ReadM Text
+readerText = do
+  s <- readerAsk
+  return $ T.pack s
 
 -- | Parse a command line option as a "URIRef"
 readerUriRef :: ReadM (URIRef Absolute)
@@ -63,7 +70,7 @@ parseRefreshCredentials = switch $
 
 -- | Parse a 'Profile'.
 parseProfile :: Parser Profile
-parseProfile = option readerByteString $
+parseProfile = option readerText $
   short 'p' <> long "profile" <> metavar "PROFILE_NAME" <>
   help "The profile to source values from"
 
@@ -81,7 +88,7 @@ parseJenkinsInstance = option readerUriRef $
 
 -- | Parse a set of job parameters.
 parseJobParameters :: Parser JobParameters
-parseJobParameters = option readerByteString $
+parseJobParameters = option readerText $
   short 'o' <> long "options" <> metavar "OPTIONS" <>
   help "Comma separated list of key=value pairs to pass to the job"
 

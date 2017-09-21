@@ -14,7 +14,7 @@ module Bartlett.Actions.Log (
 
 import           Bartlett.Network           (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util              (mkUrl, toText)
+import           Bartlett.Util              (mkUrl)
 
 import           Control.Concurrent         (threadDelay)
 import           Control.Lens               (set, (&), (^.), (^?))
@@ -24,6 +24,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.Maybe                 (fromJust, isJust)
 import           Data.Monoid                ((<>))
 import qualified Data.Text                  as T
+import qualified Data.Text.Encoding as TE
 import           Network.Wreq               (auth, defaults, param,
                                              responseBody, responseHeader)
 
@@ -40,7 +41,7 @@ requestLogs user jenkins followFlag offset = do
     liftIO $ BL.putStr $ resp ^. responseBody
   when (followFlag && isJust (resp ^? responseHeader "X-More-Data")) $ do
    liftIO $ threadDelay 1000000
-   requestLogs user jenkins  followFlag (toText . BL.fromStrict $ resp ^. responseHeader "X-Text-Size")
+   requestLogs user jenkins  followFlag $ TE.decodeUtf8 (resp ^. responseHeader "X-Text-Size")
     where reqOpts = defaults & set auth (getBasicAuth <$> user) . set (param "start") [offset]
 
 -- | Fetch logs from the current Jenkins instance.

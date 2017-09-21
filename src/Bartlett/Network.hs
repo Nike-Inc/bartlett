@@ -50,10 +50,10 @@ requestCSRFToken sess opts jenkins = do
       return (Nothing, Nothing)
     Right r ->
       return
-        (BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumbRequestField") . _String),
-         BU.toByteString <$> (r ^? responseBody . key (BU.toText "crumb") . _String))
+        (BU.toByteString <$> (r ^? responseBody . key "crumbRequestField" . _String),
+         BU.toByteString <$> (r ^? responseBody . key "crumb" . _String))
   where reqUri = BU.setPath jenkins "/crumbIssuer/api/json"
-        reqOpts = opts & param "xpath" .~ [BU.toText "concat(//crumbRequestField,\":\",//crumb)"]
+        reqOpts = opts & param "xpath" .~ ["concat(//crumbRequestField,\":\",//crumb)"]
 
 -- | Construct a valid header from a potential CSRF response.
 consCSRFHeader :: (ByteString, ByteString) -> (Options -> Options)

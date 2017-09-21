@@ -41,6 +41,7 @@ import Control.Monad.IO.Class     (MonadIO)
 import Control.Monad.Reader       (MonadReader, ReaderT)
 import Data.Aeson                 (FromJSON, ToJSON)
 import Data.ByteString.Lazy.Char8 (ByteString, toStrict)
+import Data.Text (Text)
 import GHC.Generics               (Generic)
 import Network.Wreq               (Auth, basicAuth)
 import URI.ByteString             (Absolute, URIRef)
@@ -58,9 +59,9 @@ type JobPath         = ByteString
 -- Jenkins instance.
 type ArtifactId      = ByteString
 -- ^ The artifact to download from the given job.
-type JobParameters   = ByteString
+type JobParameters   = Text
 -- ^ Comma-separated list of key=value pairs to pass along to the triggered job.
-type Profile         = ByteString
+type Profile         = Text
 -- ^ The profile to use when authenticating against Jenkins.
 type ConfigPath      = FilePath
 -- ^ The path to the job configuration to upload.

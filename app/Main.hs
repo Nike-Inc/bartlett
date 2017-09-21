@@ -9,6 +9,7 @@ import qualified Bartlett.Configuration     as C
 import           Bartlett.Parsers           (parseOptions, withInfo)
 import           Bartlett.Types
 
+import qualified Data.Text as T
 import           Control.Exception          (bracket_)
 import           Control.Monad.Reader       (ask, asks, liftIO, local,
                                              runReaderT)
@@ -42,7 +43,7 @@ requestPassword = do
 
 -- | Construct a namespaced service name for the OSX Keychain service.
 keychainService :: Profile -> String
-keychainService = unpack . mappend "bartlett."
+keychainService = T.unpack . mappend "bartlett."
 
 -- | Given a username and profile retrieve the user's password.
 --
