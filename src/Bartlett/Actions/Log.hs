@@ -24,7 +24,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.Maybe                 (fromJust, isJust)
 import           Data.Monoid                ((<>))
 import qualified Data.Text                  as T
-import qualified Data.Text.Encoding as TE
+import qualified Data.Text.Encoding         as TE
 import           Network.Wreq               (auth, defaults, param,
                                              responseBody, responseHeader)
 

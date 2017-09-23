@@ -26,9 +26,11 @@ import qualified Control.Exception          as E
 import           Control.Lens               ((&), (.~), (^?))
 import           Data.Aeson.Encode.Pretty   (encodePretty)
 import           Data.Aeson.Lens            (key, _String)
-import           Data.ByteString.Lazy.Char8 (ByteString, toStrict, unpack)
+import           Data.ByteString.Lazy.Char8 (ByteString, unpack)
 import qualified Data.CaseInsensitive       as CI
 import           Data.Maybe                 (fromMaybe)
+import           Data.Text                  (Text)
+import qualified Data.Text.Encoding         as TE
 import qualified Network.HTTP.Client        as NHC
 import           Network.Wreq               (Options, Response, header, param,
                                              responseBody)
@@ -41,7 +43,7 @@ requestCSRFToken ::
   S.Session                                  -- The current session used to interact with Jenkins.
   -> Options                                 -- Request parameters to pass along with the request.
   -> JenkinsInstance                         -- The uri to make the request to
-  -> IO (Maybe ByteString, Maybe ByteString) -- The CSRF crumb to attach to future requests.
+  -> IO (Maybe Text, Maybe Text) -- The CSRF crumb to attach to future requests.
 requestCSRFToken sess opts jenkins = do
   -- TODO fix this ugly mess
   resp <- E.try (S.getWith reqOpts sess (BU.uriToString reqUri)) :: IO (Either NHC.HttpException (Response ByteString))
@@ -50,15 +52,15 @@ requestCSRFToken sess opts jenkins = do
       return (Nothing, Nothing)
     Right r ->
       return
-        (BU.toByteString <$> (r ^? responseBody . key "crumbRequestField" . _String),
-         BU.toByteString <$> (r ^? responseBody . key "crumb" . _String))
+        (r ^? responseBody . key "crumbRequestField" . _String,
+         r ^? responseBody . key "crumb" . _String)
   where reqUri = BU.setPath jenkins "/crumbIssuer/api/json"
         reqOpts = opts & param "xpath" .~ ["concat(//crumbRequestField,\":\",//crumb)"]
 
 -- | Construct a valid header from a potential CSRF response.
-consCSRFHeader :: (ByteString, ByteString) -> (Options -> Options)
+consCSRFHeader :: (Text, Text) -> (Options -> Options)
 consCSRFHeader (field, crumb) =
-  header (CI.mk . toStrict $ field) .~ [toStrict crumb]
+  header (CI.mk . TE.encodeUtf8 $ field) .~ [TE.encodeUtf8 crumb]
 
 
 -- | General request handler that provides basic error handling.

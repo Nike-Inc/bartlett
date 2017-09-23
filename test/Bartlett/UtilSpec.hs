@@ -63,22 +63,6 @@ spec_util =
         let json = encode (Object $ fromList [("foo", String "bar")])
         toPrettyJson json `shouldBe` "{\n    \"foo\": \"bar\"\n}"
 
-    describe "pairToTuple" $ do
-      it "should throw an error if no values are given" $
-        evaluate (pairToTuple []) `shouldThrow` anyErrorCall
-      it "should return a tuple if two values are given" $
-        pairToTuple [1,2] `shouldBe` (1,2)
-      it "should throw an error if more than 2 values are given" $
-        evaluate (pairToTuple [1..5]) `shouldThrow` anyErrorCall
-      it "should throw an error if less than 2 values are given" $
-        evaluate (pairToTuple [1]) `shouldThrow` anyErrorCall
-
-    describe "parseParameters" $ do
-      it "should return a list of tuples for 'foo=bar'" $
-        parseParameters "foo=bar" `shouldBe` [("foo", "bar")]
-      it "should return an empty list if no parameters are given" $
-        parseParameters "" `shouldBe` []
-
     describe "parameters and options builders" $ do
       it "should return an options builder given a list of tuples" $
         optionsBuilder (parametersBuilder [("foo", "bar")])

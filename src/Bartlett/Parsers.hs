@@ -12,10 +12,10 @@ module Bartlett.Parsers where
 
 import           Bartlett.Types
 
-import Data.Text (Text)
-import qualified Data.Text as T
 import           Data.ByteString.Lazy.Char8 (ByteString, pack, toStrict, unpack)
 import           Data.Monoid                ((<>))
+import           Data.Text                  (Text)
+import qualified Data.Text                  as T
 import           Data.Version               (showVersion)
 import           Options.Applicative
 import           Options.Applicative.Types  (readerAsk)
@@ -37,6 +37,14 @@ readerText :: ReadM Text
 readerText = do
   s <- readerAsk
   return $ T.pack s
+
+readerJobParameters :: ReadM JobParameters
+readerJobParameters = do
+  s <- readerAsk
+  if null s
+     then return []
+     else return $ fmap (trimEquals . T.breakOn "=") . T.splitOn "," . T.pack $ s
+       where trimEquals (x,y) = (x, T.drop 1 y)
 
 -- | Parse a command line option as a "URIRef"
 readerUriRef :: ReadM (URIRef Absolute)
@@ -88,7 +96,7 @@ parseJenkinsInstance = option readerUriRef $
 
 -- | Parse a set of job parameters.
 parseJobParameters :: Parser JobParameters
-parseJobParameters = option readerText $
+parseJobParameters = option readerJobParameters $
   short 'o' <> long "options" <> metavar "OPTIONS" <>
   help "Comma separated list of key=value pairs to pass to the job"
 

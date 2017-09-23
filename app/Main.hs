@@ -9,12 +9,12 @@ import qualified Bartlett.Configuration     as C
 import           Bartlett.Parsers           (parseOptions, withInfo)
 import           Bartlett.Types
 
-import qualified Data.Text as T
 import           Control.Exception          (bracket_)
 import           Control.Monad.Reader       (ask, asks, liftIO, local,
                                              runReaderT)
 import           Data.ByteString.Lazy.Char8 (ByteString, hPutStr, pack, unpack)
 import           Data.Maybe                 (fromMaybe)
+import qualified Data.Text                  as T
 import           Options.Applicative
 import           Prelude                    hiding (putStr)
 import           System.Exit                (die)

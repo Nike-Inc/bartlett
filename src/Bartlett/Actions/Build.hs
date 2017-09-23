@@ -30,7 +30,7 @@ consBuildType Nothing =
   ("/build", BU.optionsBuilder (BU.parametersBuilder [("", "")]))
 consBuildType (Just jobParameters) =
   ("/buildWithParameters",
-    (BU.optionsBuilder . BU.parametersBuilder . BU.parseParameters) jobParameters)
+    (BU.optionsBuilder . BU.parametersBuilder ) jobParameters)
 
 -- | Trigger a build for the given job with optional build parameters.
 postBuild ::
