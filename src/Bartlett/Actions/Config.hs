@@ -10,17 +10,18 @@ Methods for executing config requests against Jenkins.
 -}
 module Bartlett.Actions.Config where
 
-import           Bartlett.Network           (execRequest)
+import           Bartlett.Network         (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util              (mkUrl, toResponseStatus)
+import           Bartlett.Util            (mkUrl, toResponseStatus)
 
-import           Control.Lens               (set, (&), (^.))
-import           Control.Monad.Reader       (asks, liftIO)
-import           Data.Aeson.Encode.Pretty   (encodePretty)
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.Maybe                 (Maybe, fromJust)
-import           Network.Wreq               (auth, defaults, responseBody,
-                                             responseStatus)
+import           Control.Lens             (set, (&), (^.))
+import           Control.Monad.Reader     (asks, liftIO)
+import           Data.Aeson.Encode.Pretty (encodePretty)
+import qualified Data.ByteString.Char8    as BC
+import qualified Data.ByteString.Lazy     as Lazy
+import           Data.Maybe               (Maybe, fromJust)
+import           Network.Wreq             (auth, defaults, responseBody,
+                                           responseStatus)
 
 -- | Construct a URL to interact with Job configurations.
 configUri :: JenkinsInstance -> JobPath -> JenkinsInstance
@@ -32,7 +33,7 @@ getConfig :: BasicAuthUser a => Maybe a -> JobPath -> Bartlett ()
 getConfig user path = do
   jenkins <- fromJust <$> asks jenkinsInstance
   resp <- liftIO $ execRequest Get reqOpts (configUri jenkins path) Nothing
-  liftIO $ BL.putStrLn $ resp ^. responseBody
+  liftIO $ BC.putStrLn $ resp ^. responseBody
     where reqOpts = defaults & set auth (getBasicAuth <$> user)
 
 -- | Update the XML configuration for the given job.
@@ -43,9 +44,9 @@ updateConfig :: BasicAuthUser a =>
   -> Bartlett ()
 updateConfig user path configPath = do
   jenkins <- fromJust <$> asks jenkinsInstance
-  configFile <- liftIO $ BL.readFile configPath
+  configFile <- liftIO $ BC.readFile configPath
   resp <- liftIO $ execRequest Post reqOpts (configUri jenkins path) (Just configFile)
-  liftIO $ BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
+  liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . toResponseStatus $ resp ^. responseStatus
     where reqOpts = defaults & set auth (getBasicAuth <$> user)
 
 -- | Delete the XML configuration for the given job.
@@ -57,6 +58,6 @@ deleteConfig user [] = return ()
 deleteConfig user (path:paths) = do
   jenkins <- fromJust <$> asks jenkinsInstance
   resp <- liftIO $ execRequest Post reqOpts (mkUrl jenkins path "/doDelete") Nothing
-  liftIO $ BL.putStrLn . encodePretty . toResponseStatus $ resp ^. responseStatus
+  liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . toResponseStatus $ resp ^. responseStatus
   deleteConfig user paths
     where reqOpts = defaults & set auth (getBasicAuth <$> user)

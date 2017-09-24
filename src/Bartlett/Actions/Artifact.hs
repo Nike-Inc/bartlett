@@ -12,16 +12,16 @@ module Bartlett.Actions.Artifact (
   getArtifact
 ) where
 
-import           Bartlett.Network           (execRequest)
+import           Bartlett.Network      (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util              (mkUrl)
+import           Bartlett.Util         (mkUrl)
 
-import           Control.Lens               (set, (&), (^.))
-import           Control.Monad.Reader       (asks, liftIO)
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.Maybe                 (fromJust)
-import           Data.Monoid                ((<>))
-import           Network.Wreq               (auth, defaults, responseBody)
+import           Control.Lens          (set, (&), (^.))
+import           Control.Monad.Reader  (asks, liftIO)
+import qualified Data.ByteString.Char8 as BC
+import           Data.Maybe            (fromJust)
+import           Data.Monoid           ((<>))
+import           Network.Wreq          (auth, defaults, responseBody)
 
 -- | Download an artifact from the provided job.
 getArtifact ::
@@ -33,5 +33,5 @@ getArtifact user path artifactId = do
   jenkins <- fromJust <$> asks jenkinsInstance
   -- TODO make this a bit clearer
   resp <- liftIO $ execRequest Get reqOpts (mkUrl jenkins path $ "/lastSuccessfulBuild/artifact/" <> artifactId) Nothing
-  liftIO $ BL.putStrLn $ resp ^. responseBody
+  liftIO $ BC.putStrLn $ resp ^. responseBody
     where reqOpts = defaults & set auth (getBasicAuth <$> user)

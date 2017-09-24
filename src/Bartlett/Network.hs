@@ -19,23 +19,25 @@ module Bartlett.Network (
   recoverableErrorHandler
 )where
 
-import           Bartlett.Types             (JenkinsInstance, RequestType (..))
-import qualified Bartlett.Util              as BU
+import           Bartlett.Types           (JenkinsInstance, RequestType (..))
+import qualified Bartlett.Util            as BU
 
-import qualified Control.Exception          as E
-import           Control.Lens               ((&), (.~), (^?))
-import           Data.Aeson.Encode.Pretty   (encodePretty)
-import           Data.Aeson.Lens            (key, _String)
-import           Data.ByteString.Lazy.Char8 (ByteString, unpack)
-import qualified Data.CaseInsensitive       as CI
-import           Data.Maybe                 (fromMaybe)
-import           Data.Text                  (Text)
-import qualified Data.Text.Encoding         as TE
-import qualified Network.HTTP.Client        as NHC
-import           Network.Wreq               (Options, Response, header, param,
-                                             responseBody)
-import qualified Network.Wreq.Session       as S
-import           System.Exit                (die)
+import qualified Control.Exception        as E
+import           Control.Lens             ((&), (.~), (^?))
+import           Data.Aeson.Encode.Pretty (encodePretty)
+import           Data.Aeson.Lens          (key, _String)
+import           Data.ByteString          (ByteString)
+import qualified Data.ByteString.Char8    as BC
+import qualified Data.ByteString.Lazy     as Lazy
+import qualified Data.CaseInsensitive     as CI
+import           Data.Maybe               (fromMaybe)
+import           Data.Text                (Text)
+import qualified Data.Text.Encoding       as TE
+import qualified Network.HTTP.Client      as NHC
+import           Network.Wreq             (Options, Response, header, param,
+                                           responseBody)
+import qualified Network.Wreq.Session     as S
+import           System.Exit              (die)
 
 
 -- | Attempt to request a CSRF token from the Jenkins server.
@@ -46,7 +48,7 @@ requestCSRFToken ::
   -> IO (Maybe Text, Maybe Text) -- The CSRF crumb to attach to future requests.
 requestCSRFToken sess opts jenkins = do
   -- TODO fix this ugly mess
-  resp <- E.try (S.getWith reqOpts sess (BU.uriToString reqUri)) :: IO (Either NHC.HttpException (Response ByteString))
+  resp <- E.try (S.getWith reqOpts sess (BU.uriToString reqUri)) :: IO (Either NHC.HttpException (Response Lazy.ByteString))
   case resp of
     Left _ ->
       return (Nothing, Nothing)
@@ -75,9 +77,10 @@ execRequest requestType reqOpts reqUrl postBody =
     case requestType of
       Post -> do
         opts <- getOpts
-        postSession reqUrl opts
+        postResponse <- postSession reqUrl opts
           `E.catch`
             recoverableErrorHandler (postSession (BU.withForcedSSL reqUrl) opts)
+        return $ Lazy.toStrict <$> postResponse
         where fileToUpload = fromMaybe "" postBody :: ByteString
               postSession url opts = S.postWith opts session (BU.uriToString url) fileToUpload
               getOpts = do
@@ -87,17 +90,18 @@ execRequest requestType reqOpts reqUrl postBody =
                     return $ reqOpts & consCSRFHeader (field, crumb)
                   _ ->
                     return reqOpts
-      Get ->
-        getSession reqUrl
+      Get -> do
+        getResponse <- getSession reqUrl
           `E.catch`
             recoverableErrorHandler (getSession . BU.withForcedSSL $ reqUrl)
-              where getSession url = S.getWith reqOpts session (BU.uriToString url)
+        return $ Lazy.toStrict <$> getResponse
+        where getSession url = S.getWith reqOpts session (BU.uriToString url)
 
 
 -- | Handler that returns a JSON representation of the error status.
 simpleErrorHandler :: NHC.HttpException -> IO a
 simpleErrorHandler (NHC.HttpExceptionRequest _ (NHC.StatusCodeException resp _)) =
-  die . unpack . encodePretty . BU.toResponseStatus . NHC.responseStatus $ resp
+  die . BC.unpack . Lazy.toStrict . encodePretty . BU.toResponseStatus . NHC.responseStatus $ resp
 
 -- | Attempt to recover from non-fatal errors with the provided action, otherwise
 --   fail again with the 'simpleErrorHandler'

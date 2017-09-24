@@ -12,16 +12,17 @@ module Bartlett.Parsers where
 
 import           Bartlett.Types
 
-import           Data.ByteString.Lazy.Char8 (ByteString, pack, toStrict, unpack)
-import           Data.Monoid                ((<>))
-import           Data.Text                  (Text)
-import qualified Data.Text                  as T
-import           Data.Version               (showVersion)
+import           Data.ByteString           (ByteString)
+import           Data.ByteString.Char8     (pack, unpack)
+import           Data.Monoid               ((<>))
+import           Data.Text                 (Text)
+import qualified Data.Text                 as T
+import           Data.Version              (showVersion)
 import           Options.Applicative
-import           Options.Applicative.Types  (readerAsk)
+import           Options.Applicative.Types (readerAsk)
 import qualified Paths_bartlett
-import           URI.ByteString             (Absolute, URIRef, parseURI,
-                                             strictURIParserOptions)
+import           URI.ByteString            (Absolute, URIRef, parseURI,
+                                            strictURIParserOptions)
 
 -- | The current bartlett version
 bartlettVersion :: String
@@ -50,7 +51,7 @@ readerJobParameters = do
 readerUriRef :: ReadM (URIRef Absolute)
 readerUriRef = do
   s <- readerAsk
-  case parseURI strictURIParserOptions (toStrict $ pack s) of
+  case parseURI strictURIParserOptions (pack s) of
     Left a ->
       readerAbort (ErrorMsg (show a))
     Right uri ->

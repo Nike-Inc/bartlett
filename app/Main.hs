@@ -1,26 +1,27 @@
 module Main where
 
-import qualified Bartlett.Actions.Artifact  as AA
-import qualified Bartlett.Actions.Build     as AB
-import qualified Bartlett.Actions.Config    as AC
-import qualified Bartlett.Actions.Info      as AI
-import qualified Bartlett.Actions.Log       as AL
-import qualified Bartlett.Configuration     as C
-import           Bartlett.Parsers           (parseOptions, withInfo)
+import qualified Bartlett.Actions.Artifact as AA
+import qualified Bartlett.Actions.Build    as AB
+import qualified Bartlett.Actions.Config   as AC
+import qualified Bartlett.Actions.Info     as AI
+import qualified Bartlett.Actions.Log      as AL
+import qualified Bartlett.Configuration    as C
+import           Bartlett.Parsers          (parseOptions, withInfo)
 import           Bartlett.Types
 
-import           Control.Exception          (bracket_)
-import           Control.Monad.Reader       (ask, asks, liftIO, local,
-                                             runReaderT)
-import           Data.ByteString.Lazy.Char8 (ByteString, hPutStr, pack, unpack)
-import           Data.Maybe                 (fromMaybe)
-import qualified Data.Text                  as T
+import           Control.Exception         (bracket_)
+import           Control.Monad.Reader      (ask, asks, liftIO, local,
+                                            runReaderT)
+import           Data.ByteString           (ByteString)
+import qualified Data.ByteString.Char8     as BC
+import           Data.Maybe                (fromMaybe)
+import qualified Data.Text                 as T
 import           Options.Applicative
-import           Prelude                    hiding (putStr)
-import           System.Exit                (die)
-import           System.IO                  (hFlush, hGetEcho, hPutChar,
-                                             hSetEcho, stderr, stdin, stdout)
-import qualified System.Keyring             as SK
+import           Prelude                   hiding (putStr)
+import           System.Exit               (die)
+import           System.IO                 (hFlush, hGetEcho, hPutChar,
+                                            hSetEcho, stderr, stdin, stdout)
+import qualified System.Keyring            as SK
 
 -- | Wrapper determining if the given action should be echoed to stdout.
 withEcho :: Bool -> IO a -> IO a
@@ -35,11 +36,11 @@ requestPassword = do
   -- Basically, printing this message on stderr allows the user to know
   -- that their password is required before executing and passing its info
   -- to downstream commands in the shell pipe.
-  hPutStr stderr "Enter password: "
+  BC.hPutStr stderr "Enter password: "
   hFlush stdout
   s <- withEcho False getLine
   hPutChar stderr '\n'
-  return $ pack s
+  return $ BC.pack s
 
 -- | Construct a namespaced service name for the OSX Keychain service.
 keychainService :: Profile -> String
@@ -58,11 +59,11 @@ selectPassword shouldStorePassword shouldRefreshCredentials profile usr = do
   pwdFromKeyChain <-
     if shouldRefreshCredentials
       then return Nothing
-      else SK.getPassword service (SK.Username (unpack usr))
+      else SK.getPassword service (SK.Username (BC.unpack usr))
 
   case pwdFromKeyChain of
     Just (SK.Password pwd) ->
-      return $ pack pwd
+      return $ BC.pack pwd
     Nothing -> do
       pwd <- requestPassword
       if shouldStorePassword
@@ -70,7 +71,7 @@ selectPassword shouldStorePassword shouldRefreshCredentials profile usr = do
           let storeFn = if shouldRefreshCredentials
                            then SK.updatePassword
                            else SK.setPassword
-          storeFn service (SK.Username (unpack usr)) (SK.Password (unpack pwd))
+          storeFn service (SK.Username (BC.unpack usr)) (SK.Password (BC.unpack pwd))
           return pwd
       else
         return pwd
@@ -80,7 +81,7 @@ bindOption :: Maybe a -> Maybe ByteString -> IO a
 bindOption a failMessage =
   case a of
     Nothing ->
-      die . unpack . fromMaybe "" $ failMessage
+      die . BC.unpack . fromMaybe "" $ failMessage
     Just a ->
       return a
 

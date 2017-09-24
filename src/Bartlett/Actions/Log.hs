@@ -12,21 +12,21 @@ module Bartlett.Actions.Log (
   getLogs
 ) where
 
-import           Bartlett.Network           (execRequest)
+import           Bartlett.Network      (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util              (mkUrl)
+import           Bartlett.Util         (mkUrl)
 
-import           Control.Concurrent         (threadDelay)
-import           Control.Lens               (set, (&), (^.), (^?))
-import           Control.Monad              (unless, when)
-import           Control.Monad.Reader       (asks, liftIO)
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.Maybe                 (fromJust, isJust)
-import           Data.Monoid                ((<>))
-import qualified Data.Text                  as T
-import qualified Data.Text.Encoding         as TE
-import           Network.Wreq               (auth, defaults, param,
-                                             responseBody, responseHeader)
+import           Control.Concurrent    (threadDelay)
+import           Control.Lens          (set, (&), (^.), (^?))
+import           Control.Monad         (unless, when)
+import           Control.Monad.Reader  (asks, liftIO)
+import qualified Data.ByteString.Char8 as BC
+import           Data.Maybe            (fromJust, isJust)
+import           Data.Monoid           ((<>))
+import qualified Data.Text             as T
+import qualified Data.Text.Encoding    as TE
+import           Network.Wreq          (auth, defaults, param, responseBody,
+                                        responseHeader)
 
 -- | Internal helper to recursively get logs from the given Jenkins instance.
 requestLogs ::
@@ -37,8 +37,8 @@ requestLogs ::
   -> Bartlett ()
 requestLogs user jenkins followFlag offset = do
   resp <- liftIO $ execRequest Get reqOpts jenkins Nothing
-  unless (BL.null $ resp ^. responseBody) $
-    liftIO $ BL.putStr $ resp ^. responseBody
+  unless (BC.null $ resp ^. responseBody) $
+    liftIO $ BC.putStr $ resp ^. responseBody
   when (followFlag && isJust (resp ^? responseHeader "X-More-Data")) $ do
    liftIO $ threadDelay 1000000
    requestLogs user jenkins  followFlag $ TE.decodeUtf8 (resp ^. responseHeader "X-Text-Size")

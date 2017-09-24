@@ -26,26 +26,32 @@ module Bartlett.Util (
   optionsBuilder
 )where
 
-import           Prelude                    hiding (dropWhile, null)
-
 import           Bartlett.Types
 
-import           Control.Lens               (set, (^.))
-import           Data.Aeson                 (Object, decode)
-import           Data.Aeson.Encode.Pretty   (encodePretty)
-import           Data.ByteString.Builder    (toLazyByteString)
-import           Data.ByteString.Lazy.Char8 (ByteString)
-import qualified Data.ByteString.Lazy.Char8 as BS
-import           Data.Monoid                ((<>))
-import           Data.Text                  (Text)
+import           Control.Lens              (Getting)
+import qualified Control.Lens              as Lens
+import           Data.Aeson                (Object, decodeStrict')
+import           Data.Aeson.Encode.Pretty  (encodePretty)
+import           Data.ByteString           (ByteString)
+import qualified Data.ByteString           as B
+import qualified Data.ByteString.Char8     as BC
+import qualified Data.ByteString.Lazy      as Lazy
+import           Data.Monoid               ((<>))
+import           Data.Text                 (Text)
 import           Network.HTTP.Types.Status
-import qualified Network.Wreq               as W
-import           URI.ByteString             (pathL, schemeBSL, serializeURIRef,
-                                             uriSchemeL)
+import qualified Network.Wreq              as W
+import           URI.ByteString            (pathL, schemeBSL, serializeURIRef',
+                                            uriSchemeL)
+
+-- | Gets the value of the provided 'Lens'.
+--
+-- Internal helper to avoid syntax like (^.)
+get :: s -> Getting a s a -> a
+get = flip Lens.view
 
 setPath :: JenkinsInstance -> ByteString -> JenkinsInstance
 setPath jenkins path =
-  set pathL (BS.toStrict path) jenkins
+  Lens.set pathL path jenkins
 
 -- | Constructs a valid Jenkins API url.
 mkUrl :: JenkinsInstance -> JobPath -> ByteString -> JenkinsInstance
@@ -56,41 +62,40 @@ mkUrl base path suffix =
 mkJobPath :: JobPath -> ByteString
 mkJobPath ""  = ""
 mkJobPath "/" = ""
-mkJobPath s   = BS.append "/job/" . BS.intercalate "/job/" . segmentPath $ s
+mkJobPath s   = B.append "/job/" . B.intercalate "/job/" . segmentPath $ s
 
 -- | Given a base Jenkins instance, force the use of HTTPS
 withForcedSSL :: JenkinsInstance -> JenkinsInstance
 withForcedSSL base =
-  case base ^. uriSchemeL . schemeBSL of
+  case base `get` (uriSchemeL . schemeBSL) of
     "http" ->
-      set (uriSchemeL . schemeBSL) "https" base
+      Lens.set (uriSchemeL . schemeBSL) "https" base
     _ ->
       base
 
 -- | Segment a slash-delimited string as well as filter empty elements.
 segmentPath :: ByteString -> [ByteString]
-segmentPath = filter (not . BS.null) . BS.split '/'
+segmentPath = filter (not . B.null) . BC.split '/'
 
 -- | Return a pretty-formatted JSON string
 toPrettyJson :: ByteString -> ByteString
-toPrettyJson s = encodePretty (decode s :: Maybe Object)
+toPrettyJson s = Lazy.toStrict $ encodePretty (decodeStrict' s :: Maybe Object)
 
 -- | Translation from Wreq's 'Status' to "StatusResponse".
 toResponseStatus :: Status -> StatusResponse
 toResponseStatus (Status code msg) =
   StatusResponse {
     statusCode = code,
-    statusMessage = (BS.unpack . BS.fromStrict) msg
+    statusMessage = BC.unpack msg
   }
 
 -- | Serialize a URI to a String
 uriToString :: JenkinsInstance -> String
-uriToString = BS.unpack . toLazyByteString . serializeURIRef
+uriToString = BC.unpack . serializeURIRef'
 
 -- | Compose a list of key=val pairs into a "Network.Wreq.Options" builder.
 parametersBuilder :: [(Text, Text)] -> (W.Options -> W.Options)
-parametersBuilder opts = Prelude.foldl (.) id $
-  fmap (\ (k, v) -> set (W.param k) [v]) opts
+parametersBuilder = foldl (.) id . fmap (\ (k, v) -> Lens.set (W.param k) [v])
 
 -- | Compose the provided options builder with Wreq's default options.
 optionsBuilder :: (W.Options -> W.Options) -> W.Options

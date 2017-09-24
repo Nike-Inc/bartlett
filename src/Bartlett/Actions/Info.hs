@@ -12,15 +12,15 @@ module Bartlett.Actions.Info (
   getInfo
 ) where
 
-import           Bartlett.Network           (execRequest)
+import           Bartlett.Network      (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util              (mkUrl, toPrettyJson)
+import           Bartlett.Util         (mkUrl, toPrettyJson)
 
-import           Control.Lens               (set, (&), (^.))
-import           Control.Monad.Reader       (asks, liftIO)
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.Maybe                 (fromJust)
-import           Network.Wreq               (auth, defaults, responseBody)
+import           Control.Lens          (set, (&), (^.))
+import           Control.Monad.Reader  (asks, liftIO)
+import qualified Data.ByteString.Char8 as BL
+import           Data.Maybe            (fromJust)
+import           Network.Wreq          (auth, defaults, responseBody)
 
 
 -- | Retrieve information for the given job from the given jenkins instance.

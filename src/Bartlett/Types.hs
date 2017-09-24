@@ -37,14 +37,14 @@ module Bartlett.Types (
   Bartlett(..)
 ) where
 
-import Control.Monad.IO.Class     (MonadIO)
-import Control.Monad.Reader       (MonadReader, ReaderT)
-import Data.Aeson                 (FromJSON, ToJSON)
-import Data.ByteString.Lazy.Char8 (ByteString, toStrict)
-import Data.Text                  (Text)
-import GHC.Generics               (Generic)
-import Network.Wreq               (Auth, basicAuth)
-import URI.ByteString             (Absolute, URIRef)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Reader   (MonadReader, ReaderT)
+import Data.Aeson             (FromJSON, ToJSON)
+import Data.ByteString        (ByteString)
+import Data.Text              (Text)
+import GHC.Generics           (Generic)
+import Network.Wreq           (Auth, basicAuth)
+import URI.ByteString         (Absolute, URIRef)
 
 -- TODO use newtypes!! doesn't require boxing
 
@@ -84,7 +84,7 @@ data User =
 
 -- | Basic auth implementation for 'User'
 instance BasicAuthUser User where
-  getBasicAuth (User usr pwd) = basicAuth (toStrict usr) (toStrict pwd)
+  getBasicAuth (User usr pwd) = basicAuth usr pwd
 
 -- | Represents all available sub-commands for 'Bartlett'.
 data Command =

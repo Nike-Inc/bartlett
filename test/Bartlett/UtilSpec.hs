@@ -3,13 +3,14 @@ module Bartlett.UtilSpec where
 import           Bartlett.Types
 import           Bartlett.Util
 
-import           Control.Exception          (evaluate)
+import           Control.Exception         (evaluate)
 import           Control.Lens
 import           Data.Aeson
-import           Data.ByteString.Lazy.Char8
+import           Data.ByteString.Char8
+import qualified Data.ByteString.Lazy      as Lazy
 import           GHC.Exts
-import           Network.HTTP.Types.Status  hiding (statusCode, statusMessage)
-import qualified Network.Wreq               as W
+import           Network.HTTP.Types.Status hiding (statusCode, statusMessage)
+import qualified Network.Wreq              as W
 import           Test.Hspec
 
 import           Data.Either.Unwrap
@@ -60,7 +61,7 @@ spec_util =
 
     describe "toPrettyJson" $
       it "should return a json string with pretty new-lines :^)" $ do
-        let json = encode (Object $ fromList [("foo", String "bar")])
+        let json = Lazy.toStrict $ encode (Object $ fromList [("foo", String "bar")])
         toPrettyJson json `shouldBe` "{\n    \"foo\": \"bar\"\n}"
 
     describe "parameters and options builders" $ do
