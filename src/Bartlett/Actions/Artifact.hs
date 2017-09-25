@@ -28,10 +28,17 @@ getArtifact ::
   BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
   -> JobPath                 -- ^ The job to get the artifact from.
   -> ArtifactId              -- ^ The artifact to get from the job.
-  -> Bartlett ()
-getArtifact user path artifactId = do
-  jenkins <- fromJust <$> asks jenkinsInstance
-  -- TODO make this a bit clearer
-  resp <- liftIO $ execRequest Get reqOpts (mkUrl jenkins path $ "/lastSuccessfulBuild/artifact/" <> artifactId) Nothing
-  liftIO $ BC.putStrLn $ resp ^. responseBody
-    where reqOpts = defaults & set auth (getBasicAuth <$> user)
+  -> Bartlett (Either BartlettError ())
+getArtifact user path artifactId =
+  let reqOpts = defaults & set auth (getBasicAuth <$> user)
+  in do
+    jenkins <- fromJust <$> asks jenkinsInstance
+    let uri = mkUrl jenkins path $ "/lastSuccessfulBuild/artifact/" <> artifactId
+    -- TODO make this a bit clearer
+    response <- execRequest Get reqOpts uri Nothing
+    case response of
+      (Left e) ->
+        return . Left $ e
+      Right resp -> do
+        liftIO $ BC.putStrLn $ resp ^. responseBody
+        return . Right $ ()

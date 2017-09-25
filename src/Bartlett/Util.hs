@@ -38,6 +38,7 @@ import qualified Data.ByteString.Char8     as BC
 import qualified Data.ByteString.Lazy      as Lazy
 import           Data.Monoid               ((<>))
 import           Data.Text                 (Text)
+import qualified Data.Text.Encoding        as TE
 import           Network.HTTP.Types.Status
 import qualified Network.Wreq              as W
 import           URI.ByteString            (pathL, schemeBSL, serializeURIRef',
@@ -86,7 +87,7 @@ toResponseStatus :: Status -> StatusResponse
 toResponseStatus (Status code msg) =
   StatusResponse {
     statusCode = code,
-    statusMessage = BC.unpack msg
+    statusMessage = TE.decodeUtf8 msg
   }
 
 -- | Serialize a URI to a String

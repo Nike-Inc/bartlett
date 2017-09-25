@@ -93,7 +93,7 @@ userWithPassword (Just username) getPwd = do
   return $ Just (User username password)
 
 -- | Execute the appropriate sub-command given parsed cli options.
-run :: Bartlett ()
+run :: Bartlett (Either BartlettError ())
 run = do
   profile <- fromMaybe "default" <$> asks profile
   config  <- liftIO $ C.getConfiguration profile
@@ -131,5 +131,11 @@ run = do
                   AC.getConfig usr (head jobPath)
 
 main :: IO ()
-main = execParser (parseOptions `withInfo` "") >>= \opts ->
-  runReaderT (runBartlett run) opts
+main = execParser (parseOptions `withInfo` "") >>= \opts -> do
+  -- TODO figure out if more needs to be done here for printing errors
+  returnValue <- runReaderT (runBartlett run) opts
+  case returnValue of
+    Left e ->
+      print e
+    Right _ ->
+      return ()

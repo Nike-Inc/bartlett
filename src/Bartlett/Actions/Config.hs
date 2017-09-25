@@ -29,35 +29,52 @@ configUri base path =
   mkUrl base path "/config.xml"
 
 -- | Retrieve the XML configuration for the given job.
-getConfig :: BasicAuthUser a => Maybe a -> JobPath -> Bartlett ()
-getConfig user path = do
-  jenkins <- fromJust <$> asks jenkinsInstance
-  resp <- liftIO $ execRequest Get reqOpts (configUri jenkins path) Nothing
-  liftIO $ BC.putStrLn $ resp ^. responseBody
-    where reqOpts = defaults & set auth (getBasicAuth <$> user)
+getConfig :: BasicAuthUser a => Maybe a -> JobPath -> Bartlett (Either BartlettError ())
+getConfig user path =
+  let reqOpts = defaults & set auth (getBasicAuth <$> user)
+  in do
+    jenkins <- fromJust <$> asks jenkinsInstance
+    response <- execRequest Get reqOpts (configUri jenkins path) Nothing
+    case response of
+      Left e ->
+        return . Left $ e
+      Right resp -> do
+        liftIO $ BC.putStrLn $ resp ^. responseBody
+        return . Right $ ()
 
 -- | Update the XML configuration for the given job.
 updateConfig :: BasicAuthUser a =>
   Maybe a            -- The user to authenticate with.
   -> JobPath         -- The Job for the given Jenkins instance to interact with.
   -> ConfigPath      -- Path to the XML configuration to upload to Jenkins.
-  -> Bartlett ()
-updateConfig user path configPath = do
-  jenkins <- fromJust <$> asks jenkinsInstance
-  configFile <- liftIO $ BC.readFile configPath
-  resp <- liftIO $ execRequest Post reqOpts (configUri jenkins path) (Just configFile)
-  liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . toResponseStatus $ resp ^. responseStatus
-    where reqOpts = defaults & set auth (getBasicAuth <$> user)
+  -> Bartlett (Either BartlettError ())
+updateConfig user path configPath =
+  let reqOpts = defaults & set auth (getBasicAuth <$> user)
+  in do
+    jenkins <- fromJust <$> asks jenkinsInstance
+    configFile <- liftIO $ BC.readFile configPath
+    response <- execRequest Post reqOpts (configUri jenkins path) (Just configFile)
+    case response of
+      Left e ->
+        return . Left $ e
+      Right resp -> do
+        liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . toResponseStatus $ resp ^. responseStatus
+        return . Right $ ()
 
 -- | Delete the XML configuration for the given job.
 deleteConfig :: BasicAuthUser a =>
   Maybe a              -- The user to authenticate with.
   -> [JobPath]         -- The job for the given Jenkins instance to delete.
-  -> Bartlett ()
-deleteConfig user [] = return ()
-deleteConfig user (path:paths) = do
-  jenkins <- fromJust <$> asks jenkinsInstance
-  resp <- liftIO $ execRequest Post reqOpts (mkUrl jenkins path "/doDelete") Nothing
-  liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . toResponseStatus $ resp ^. responseStatus
-  deleteConfig user paths
-    where reqOpts = defaults & set auth (getBasicAuth <$> user)
+  -> Bartlett (Either BartlettError ())
+deleteConfig user [] = return . Right $ ()
+deleteConfig user (path:paths) =
+  let reqOpts = defaults & set auth (getBasicAuth <$> user)
+  in do
+    jenkins <- fromJust <$> asks jenkinsInstance
+    response <- execRequest Post reqOpts (mkUrl jenkins path "/doDelete") Nothing
+    case response of
+      Left e ->
+        return . Left $ e
+      Right resp -> do
+        liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . toResponseStatus $ resp ^. responseStatus
+        deleteConfig user paths

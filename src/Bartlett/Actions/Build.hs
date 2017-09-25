@@ -39,12 +39,17 @@ postBuild ::
   BasicAuthUser b => Maybe b   -- ^ The user to authenticate with.
   -> JobPath                   -- ^ The job to trigger a build against.
   -> Maybe JobParameters       -- ^ Optional set of job parameters to trigger with.
-  -> Bartlett ()
+  -> Bartlett (Either BartlettError ())
 postBuild user path parameters =
   let (suffix, buildOpts) = consBuildType parameters
       reqOpts = buildOpts & set auth (getBasicAuth <$> user)
   in do
   jenkins <- fromJust <$> asks jenkinsInstance
-  resp <- liftIO $ execRequest Post reqOpts (BU.mkUrl jenkins path suffix) Nothing
-  liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . BU.toResponseStatus $
-    resp ^. responseStatus
+  response <- execRequest Post reqOpts (BU.mkUrl jenkins path suffix) Nothing
+  case response of
+    (Left e) ->
+      return . Left $ e
+    Right resp -> do
+      liftIO $ BC.putStrLn . Lazy.toStrict . encodePretty . BU.toResponseStatus $
+        resp ^. responseStatus
+      return . Right $ ()

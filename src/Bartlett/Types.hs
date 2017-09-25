@@ -33,8 +33,10 @@ module Bartlett.Types (
   -- * Network Types
   StatusResponse(..),
   RequestType(..),
+  CrumbResponse(..),
   -- * Bartlett
-  Bartlett(..)
+  Bartlett(..),
+  BartlettError(..)
 ) where
 
 import Control.Monad.IO.Class (MonadIO)
@@ -104,6 +106,18 @@ data Options = Options {
   cmd                :: Command
 } deriving (Show)
 
+-- | Enumeration of all known sources of failure in Bartlett.
+data BartlettError =
+  NetworkError
+  -- ^ Something happened at the network layer that prevented an action from completing successfully.
+  | ConfigurationError
+  -- ^ There was a problem sourcing some required configuration item before completing successfully.
+  | JenkinsError
+  -- ^ Jenkins reported a non-2xx response for our attempted action.
+  | CsrfProtectionNotEnabled
+  -- ^ Non-fatal; there was an error attempting to get the CSRF crumb from Jenkins but it was not enabled.
+  deriving (Eq, Show)
+
 -- | The Bartlett Monad which encompases a few useful Monad Transformers.
 newtype Bartlett a = Bartlett {
   runBartlett :: ReaderT Options IO a
@@ -114,14 +128,21 @@ newtype Bartlett a = Bartlett {
 --   At this time 'Data.Aeson' does not support parsing 'ByteString', so accept a
 --   'String' instead.
 data StatusResponse = StatusResponse {
-      statusCode :: Int,      -- ^ Status code for the response
-      statusMessage :: String -- ^ Message for the response
-    }
+    statusCode :: Int,      -- ^ Status code for the response
+    statusMessage :: Text -- ^ Message for the response
+  }
   deriving (Eq, Generic, Show)
-
--- Derived JSON serlializers
 instance ToJSON StatusResponse
 instance FromJSON StatusResponse
+
+-- | Wrapper around the crumb response from Jenkins.
+data CrumbResponse = CrumbResponse {
+    crumbRequestField :: Text,
+    crumb :: Text
+  }
+  deriving (Eq, Generic, Show)
+instance ToJSON CrumbResponse
+instance FromJSON CrumbResponse
 
 -- | Incomplete sum type for network requests
 data RequestType = Get | Post

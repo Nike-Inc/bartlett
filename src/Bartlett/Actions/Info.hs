@@ -31,11 +31,16 @@ import           Network.Wreq          (auth, defaults, responseBody)
 getInfo ::
   BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
   -> [JobPath]               -- ^ The jobs to get information from.
-  -> Bartlett ()
-getInfo user [] = return ()
-getInfo user (path:paths) = do
-  jenkins <- fromJust <$> asks jenkinsInstance
-  resp <- liftIO $ execRequest Get reqOpts (mkUrl jenkins path "/api/json") Nothing
-  liftIO $ BL.putStrLn . toPrettyJson $ resp ^. responseBody
-  getInfo user paths
-    where reqOpts = defaults & set auth (getBasicAuth <$> user)
+  -> Bartlett (Either BartlettError ())
+getInfo user [] = return . Right $ ()
+getInfo user (path:paths) =
+  let reqOpts = defaults & set auth (getBasicAuth <$> user)
+  in do
+    jenkins <- fromJust <$> asks jenkinsInstance
+    response <- execRequest Get reqOpts (mkUrl jenkins path "/api/json") Nothing
+    case response of
+      Left e ->
+        return . Left $ e
+      Right resp -> do
+        liftIO $ BL.putStrLn . toPrettyJson $ resp ^. responseBody
+        getInfo user paths

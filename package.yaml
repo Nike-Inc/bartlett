@@ -18,10 +18,11 @@ library:
   source-dirs: src
   ghc-options:
     - -Wall
+    - -fno-warn-partial-type-signatures
+    - -fno-warn-name-shadowing
     - -fwarn-tabs
     - -fwarn-unused-imports
     - -fwarn-missing-signatures
-    - -fwarn-name-shadowing
     - -fwarn-incomplete-patterns
   exposed-modules:
     - Bartlett.Types

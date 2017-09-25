@@ -18,7 +18,7 @@ import           Bartlett.Util         (mkUrl)
 
 import           Control.Concurrent    (threadDelay)
 import           Control.Lens          (set, (&), (^.), (^?))
-import           Control.Monad         (unless, when)
+import           Control.Monad         (unless)
 import           Control.Monad.Reader  (asks, liftIO)
 import qualified Data.ByteString.Char8 as BC
 import           Data.Maybe            (fromJust, isJust)
@@ -34,15 +34,22 @@ requestLogs ::
   -> JenkinsInstance         -- ^ The Jenkins instance to interact with.
   -> FollowOutputFlag        -- ^ Whether to recursively fetch logs or not.
   -> T.Text                  -- ^ The current offset for log output
-  -> Bartlett ()
-requestLogs user jenkins followFlag offset = do
-  resp <- liftIO $ execRequest Get reqOpts jenkins Nothing
-  unless (BC.null $ resp ^. responseBody) $
-    liftIO $ BC.putStr $ resp ^. responseBody
-  when (followFlag && isJust (resp ^? responseHeader "X-More-Data")) $ do
-   liftIO $ threadDelay 1000000
-   requestLogs user jenkins  followFlag $ TE.decodeUtf8 (resp ^. responseHeader "X-Text-Size")
-    where reqOpts = defaults & set auth (getBasicAuth <$> user) . set (param "start") [offset]
+  -> Bartlett (Either BartlettError ())
+requestLogs user jenkins followFlag offset =
+  let reqOpts = defaults & set auth (getBasicAuth <$> user) . set (param "start") [offset]
+  in do
+    resp <- execRequest Get reqOpts jenkins Nothing
+    case resp of
+      Left e ->
+        return . Left $ e
+      Right resp -> do
+        unless (BC.null $ resp ^. responseBody) $
+          liftIO . BC.putStr $ resp ^. responseBody
+        if followFlag && isJust (resp ^? responseHeader "X-More-Data")
+           then do
+             liftIO $ threadDelay 1000000
+             requestLogs user jenkins  followFlag $ TE.decodeUtf8 (resp ^. responseHeader "X-Text-Size")
+           else return . Right $ ()
 
 -- | Fetch logs from the current Jenkins instance.
 getLogs ::
@@ -50,9 +57,8 @@ getLogs ::
   -> FollowOutputFlag        -- ^ Whether to follow log output or not.
   -> JobPath                 -- ^ The job to get logs for.
   -> BuildNumber             -- ^ The build number to get logs for.
-  -> Bartlett ()
+  -> Bartlett (Either BartlettError ())
 getLogs user followFlag path buildNumber = do
   jenkins <- fromJust <$> asks jenkinsInstance
   let inst = mkUrl jenkins path $ "/" <> buildNumber <> "/logText/progressiveText"
   requestLogs user inst followFlag "0"
-  return ()
