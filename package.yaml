@@ -8,22 +8,24 @@ maintainer: fernando.freire@nike.com
 copyright: 2016-Present Nike, Inc.
 license: BSD3
 github: Nike-inc/bartlett
+
+# Global settings applied to all artifact types
 default-extensions:
   - OverloadedStrings
+ghc-options:
+  - -Wall
+  - -fno-warn-partial-type-signatures
+  - -fno-warn-name-shadowing
+  - -fwarn-tabs
+  - -fwarn-unused-imports
+  - -fwarn-missing-signatures
+  - -fwarn-incomplete-patterns
 dependencies:
   - base >=4.7 && <5
   - bytestring
 
 library:
   source-dirs: src
-  ghc-options:
-    - -Wall
-    - -fno-warn-partial-type-signatures
-    - -fno-warn-name-shadowing
-    - -fwarn-tabs
-    - -fwarn-unused-imports
-    - -fwarn-missing-signatures
-    - -fwarn-incomplete-patterns
   exposed-modules:
     - Bartlett.Types
     - Bartlett.Util
@@ -78,8 +80,8 @@ tests:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - aeson
       - bartlett
+      - aeson
       - either-unwrap
       - hspec
       - http-types

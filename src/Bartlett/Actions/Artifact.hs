@@ -12,33 +12,32 @@ module Bartlett.Actions.Artifact (
   getArtifact
 ) where
 
-import           Bartlett.Network      (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util         (mkUrl)
+import           Bartlett.Util         (mkUrl, withJenkins)
 
 import           Control.Lens          (set, (&), (^.))
-import           Control.Monad.Reader  (asks, liftIO)
+import           Control.Monad.Reader  (ask, liftIO)
 import qualified Data.ByteString.Char8 as BC
-import           Data.Maybe            (fromJust)
 import           Data.Monoid           ((<>))
 import           Network.Wreq          (auth, defaults, responseBody)
 
--- | Download an artifact from the provided job.
+-- | Download an artifact from the given job.
 getArtifact ::
-  BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
-  -> JobPath                 -- ^ The job to get the artifact from.
-  -> ArtifactId              -- ^ The artifact to get from the job.
+  JobPath       -- ^ The job to get the artifact from.
+  -> ArtifactId -- ^ The artifact to get from the job.
   -> Bartlett (Either BartlettError ())
-getArtifact user path artifactId =
-  let reqOpts = defaults & set auth (getBasicAuth <$> user)
-  in do
-    jenkins <- fromJust <$> asks jenkinsInstance
-    let uri = mkUrl jenkins path $ "/lastSuccessfulBuild/artifact/" <> artifactId
-    -- TODO make this a bit clearer
-    response <- execRequest Get reqOpts uri Nothing
-    case response of
-      (Left e) ->
-        return . Left $ e
-      Right resp -> do
-        liftIO $ BC.putStrLn $ resp ^. responseBody
-        return . Right $ ()
+getArtifact path artifactId = do
+    options <- ask
+    let uri = mkUrl (jenkinsInstance options) path $
+                "/lastSuccessfulBuild/artifact/" <> artifactId
+    let reqOpts = defaults & set auth (getBasicAuth <$> user options)
+    let execRequest = requestExecutor options
+
+    withJenkins uri $ do
+      response <- execRequest Get reqOpts Nothing
+      case response of
+        (Left e) ->
+          return . Left $ e
+        Right resp -> do
+          liftIO $ BC.putStrLn $ resp ^. responseBody
+          return . Right $ ()

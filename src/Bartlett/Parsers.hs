@@ -159,8 +159,8 @@ parseCommand = subparser $
   <> command "log" (parseLog `withInfo` "Print (or follow) log output for jobs")
 
 -- | Combinator for all command line options.
-parseOptions :: Parser Options
-parseOptions = Options
+parseOptions :: Parser CliOpts
+parseOptions = CliOpts
   <$> optional parseUsername
   <*> optional parseJenkinsInstance
   <*> optional parseProfile

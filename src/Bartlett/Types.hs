@@ -29,24 +29,25 @@ module Bartlett.Types (
   User(..),
   -- * Command-Line Types
   Command(..),
-  Options(..),
+  CliOpts(..),
   -- * Network Types
   StatusResponse(..),
   RequestType(..),
   CrumbResponse(..),
   -- * Bartlett
+  Env(..),
   Bartlett(..),
   BartlettError(..)
 ) where
 
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Reader   (MonadReader, ReaderT)
-import Data.Aeson             (FromJSON, ToJSON)
-import Data.ByteString        (ByteString)
-import Data.Text              (Text)
-import GHC.Generics           (Generic)
-import Network.Wreq           (Auth, basicAuth)
-import URI.ByteString         (Absolute, URIRef)
+import           Control.Monad.IO.Class (MonadIO)
+import           Control.Monad.Reader   (MonadReader, ReaderT)
+import           Data.Aeson             (FromJSON, ToJSON)
+import           Data.ByteString        (ByteString)
+import           Data.Text              (Text)
+import           GHC.Generics           (Generic)
+import qualified Network.Wreq           as Wreq
+import           URI.ByteString         (Absolute, URIRef)
 
 -- TODO use newtypes!! doesn't require boxing
 
@@ -78,7 +79,7 @@ type BuildNumber     = ByteString
 class BasicAuthUser a where
   -- ^ Retrieve the user and password information from the given object and
   -- return an 'Auth' object.
-  getBasicAuth :: a -> Auth
+  getBasicAuth :: a -> Wreq.Auth
 
 -- | Simple representation of a user
 data User =
@@ -86,7 +87,7 @@ data User =
 
 -- | Basic auth implementation for 'User'
 instance BasicAuthUser User where
-  getBasicAuth (User usr pwd) = basicAuth usr pwd
+  getBasicAuth (User usr pwd) = Wreq.basicAuth usr pwd
 
 -- | Represents all available sub-commands for 'Bartlett'.
 data Command =
@@ -97,14 +98,25 @@ data Command =
   | Log FollowOutputFlag JobPath BuildNumber       -- ^ Print the log output for a given job.
   deriving (Show)
 
+-- | Runtime options for 'Bartlett'
+data Env = Env {
+  user            :: Maybe User,
+  jenkinsInstance :: JenkinsInstance,
+  requestExecutor ::
+    !(RequestType
+      -> Wreq.Options
+      -> Maybe ByteString
+      -> Bartlett (Either BartlettError (Wreq.Response ByteString)))
+}
+
 -- | All available CLI options for 'Bartlett'.
-data Options = Options {
-  username           :: Maybe Username,
-  jenkinsInstance    :: Maybe JenkinsInstance,
-  profile            :: Maybe Profile,
+data CliOpts = CliOpts {
+  uname :: Maybe Username,
+  jenkins :: Maybe JenkinsInstance,
+  prof :: Maybe Profile,
   refreshCredentials :: Bool,
-  cmd                :: Command
-} deriving (Show)
+  cmd :: Command
+}
 
 -- | Enumeration of all known sources of failure in Bartlett.
 data BartlettError =
@@ -120,8 +132,8 @@ data BartlettError =
 
 -- | The Bartlett Monad which encompases a few useful Monad Transformers.
 newtype Bartlett a = Bartlett {
-  runBartlett :: ReaderT Options IO a
-} deriving (Applicative, Functor, Monad, MonadIO, MonadReader Options)
+  runBartlett :: ReaderT Env IO a
+} deriving (Applicative, Functor, Monad, MonadIO, MonadReader Env)
 
 -- | Wrapper around Wreq's 'Status' type.
 --

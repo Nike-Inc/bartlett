@@ -6,17 +6,19 @@ import qualified Bartlett.Actions.Config   as AC
 import qualified Bartlett.Actions.Info     as AI
 import qualified Bartlett.Actions.Log      as AL
 import qualified Bartlett.Configuration    as C
+import qualified Bartlett.Network          as Network
 import           Bartlett.Parsers          (parseOptions, withInfo)
 import           Bartlett.Types
 
+import           Control.Applicative       ((<|>))
 import           Control.Exception         (bracket_)
-import           Control.Monad.Reader      (ask, asks, liftIO, local,
-                                            runReaderT)
+import           Control.Monad.Reader      (runReaderT)
 import           Data.ByteString           (ByteString)
 import qualified Data.ByteString.Char8     as BC
 import           Data.Maybe                (fromMaybe)
+import           Data.Text                 (Text)
 import qualified Data.Text                 as T
-import           Options.Applicative
+import           Options.Applicative       (execParser)
 import           Prelude                   hiding (putStr)
 import           System.Exit               (die)
 import           System.IO                 (hFlush, hGetEcho, hPutChar,
@@ -77,11 +79,11 @@ selectPassword shouldStorePassword shouldRefreshCredentials profile usr = do
         return pwd
 
 -- | Bind an option, but if it is not provided exit the program.
-bindOption :: Maybe a -> Maybe ByteString -> IO a
+bindOption :: Maybe a -> Text -> IO a
 bindOption a failMessage =
   case a of
     Nothing ->
-      die . BC.unpack . fromMaybe "" $ failMessage
+      die . T.unpack $ failMessage
     Just a ->
       return a
 
@@ -93,49 +95,47 @@ userWithPassword (Just username) getPwd = do
   return $ Just (User username password)
 
 -- | Execute the appropriate sub-command given parsed cli options.
-run :: Bartlett (Either BartlettError ())
-run = do
-  profile <- fromMaybe "default" <$> asks profile
-  config  <- liftIO $ C.getConfiguration profile
-  configJenkins <- liftIO $ C.getJenkinsInstance config
-  usersJenkins <- asks jenkinsInstance
-  jenkins <- liftIO $ bindOption (usersJenkins <|> configJenkins)
-                (Just "Could not determine the Jenkins instance to use.")
-  shouldStorePassword <- liftIO $ fromMaybe False <$> C.getStorePassword config
-  configUser <- liftIO $ C.getUsername config
-  userUser   <- asks username
-  refreshCredentials <- asks refreshCredentials
-  usr <- liftIO $ userWithPassword (userUser <|> configUser)
-                                   (selectPassword shouldStorePassword refreshCredentials profile)
-  command <- asks cmd
-  options <- ask
-
-  local (const $ options { jenkinsInstance=Just jenkins }) $
-    case command of
-      Info jobPaths ->
-        AI.getInfo usr jobPaths
-      Build jobPath jobParameters ->
-        AB.postBuild usr jobPath jobParameters
-      Artifact jobPath artifactId ->
-        AA.getArtifact usr jobPath artifactId
-      Log followFlag jobPath buildNumber ->
-        AL.getLogs usr followFlag jobPath buildNumber
-      Config deleteFlag jobPath configFilePath ->
-        if deleteFlag
-           then AC.deleteConfig usr jobPath
-           else
-              case configFilePath of
-                Just cp ->
-                  AC.updateConfig usr (head jobPath) cp
-                Nothing ->
-                  AC.getConfig usr (head jobPath)
+run :: Command -> Bartlett (Either BartlettError ())
+run cmd =
+  case cmd of
+    Info jobPaths ->
+      AI.getInfo jobPaths
+    Build jobPath jobParameters ->
+      AB.postBuild jobPath jobParameters
+    Artifact jobPath artifactId ->
+      AA.getArtifact jobPath artifactId
+    Log followFlag jobPath buildNumber ->
+      AL.getLogs followFlag jobPath buildNumber
+    Config deleteFlag jobPath configFilePath ->
+      if deleteFlag
+         then AC.deleteConfig jobPath
+         else
+            case configFilePath of
+              Just cp ->
+                AC.updateConfig (head jobPath) cp
+              Nothing ->
+                AC.getConfig (head jobPath)
 
 main :: IO ()
-main = execParser (parseOptions `withInfo` "") >>= \opts -> do
-  -- TODO figure out if more needs to be done here for printing errors
-  returnValue <- runReaderT (runBartlett run) opts
-  case returnValue of
-    Left e ->
-      print e
-    Right _ ->
-      return ()
+main = execParser (parseOptions `withInfo` "") >>= \cliOpts ->
+  let profile = fromMaybe "default" (prof cliOpts)
+      shouldRefreshCreds = refreshCredentials cliOpts
+  in do
+    userConfig <- C.getConfiguration profile
+    profileJenkins <- C.getJenkinsInstance userConfig
+    jenkins <- bindOption (jenkins cliOpts <|> profileJenkins) "Could not determine Jenkins instance to use."
+    shouldStorePassword <- fromMaybe False <$> C.getStorePassword userConfig
+
+    userConfigName <- C.getUsername userConfig
+    usr <- userWithPassword (uname cliOpts <|> userConfigName)
+                            (selectPassword shouldStorePassword shouldRefreshCreds profile)
+
+    let env = Env usr jenkins Network.execRequest
+
+    -- TODO figure out if more needs to be done here for printing errors
+    returnValue <- runReaderT (runBartlett . run . cmd $ cliOpts) env
+    case returnValue of
+      Left e ->
+        print e
+      Right _ ->
+        return ()

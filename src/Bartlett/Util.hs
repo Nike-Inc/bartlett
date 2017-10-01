@@ -23,13 +23,16 @@ module Bartlett.Util (
   uriToString,
   -- * Query Parameter Helpers
   parametersBuilder,
-  optionsBuilder
+  optionsBuilder,
+  -- * Reader utils
+  withJenkins
 )where
 
 import           Bartlett.Types
 
 import           Control.Lens              (Getting)
 import qualified Control.Lens              as Lens
+import           Control.Monad.Reader      (ask, local)
 import           Data.Aeson                (Object, decodeStrict')
 import           Data.Aeson.Encode.Pretty  (encodePretty)
 import           Data.ByteString           (ByteString)
@@ -101,3 +104,8 @@ parametersBuilder = foldl (.) id . fmap (\ (k, v) -> Lens.set (W.param k) [v])
 -- | Compose the provided options builder with Wreq's default options.
 optionsBuilder :: (W.Options -> W.Options) -> W.Options
 optionsBuilder builder = builder W.defaults
+
+withJenkins :: JenkinsInstance -> Bartlett a -> Bartlett a
+withJenkins jenkins bartlettAction = do
+  options <- ask
+  local (const $ options { jenkinsInstance = jenkins }) bartlettAction

@@ -17,8 +17,8 @@ import           Data.Either.Unwrap
 import           URI.ByteString
 
 -- | Helper to create instances of 'JenkinsInstance'.
-jenkins :: Bool -> JenkinsInstance
-jenkins withSSL =
+jks :: Bool -> JenkinsInstance
+jks withSSL =
   fromRight $ parseURI strictURIParserOptions url
     where url = if withSSL
                    then "https://example.com"
@@ -29,9 +29,9 @@ spec_util =
 
     describe "mkUrl" $ do
       it "should return the JSON API at the root of the base url when no JobPath is given" $
-        uriToString (mkUrl (jenkins False) "" "/api/json") `shouldEndWith` "/api/json"
+        uriToString (mkUrl (jks False) "" "/api/json") `shouldEndWith` "/api/json"
       it "should return a fully qualified API endpoint when given a JobPath" $
-        uriToString (mkUrl (jenkins True) "foo" "/api/json") `shouldBe` "https://example.com/job/foo/api/json"
+        uriToString (mkUrl (jks True) "foo" "/api/json") `shouldBe` "https://example.com/job/foo/api/json"
 
     describe "mkJobPath" $ do
       it "should return the empty string given empty input" $
@@ -47,9 +47,9 @@ spec_util =
 
     describe "withForcedSSL" $ do
       it "should return a uri with the https protocol" $
-        uriToString (withForcedSSL (jenkins False)) `shouldStartWith` "https://"
+        uriToString (withForcedSSL (jks False)) `shouldStartWith` "https://"
       it "should return a uri with the https protocol when https is provided" $
-        withForcedSSL (jenkins True) `shouldBe` jenkins True
+        withForcedSSL (jks True) `shouldBe` jks True
 
     describe "segmentPath" $ do
       it "should return an empty collection if nothing is passed in" $

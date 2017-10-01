@@ -19,12 +19,13 @@ module Bartlett.Network (
   execRequest
 )where
 
-import           Bartlett.Types         hiding (Options)
+import           Bartlett.Types
 import qualified Bartlett.Util          as BU
 
 import qualified Control.Exception      as E
 import           Control.Lens           ((&), (.~), (^.))
 import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.Reader   (asks)
 import           Data.Aeson             (decode)
 import           Data.ByteString        (ByteString)
 import qualified Data.ByteString.Lazy   as Lazy
@@ -62,12 +63,13 @@ consCSRFHeader (field, crumb) =
 execRequest ::
   RequestType         -- ^ The type of request to make
   -> Options          -- ^ Request params to pass along with the request.
-  -> JenkinsInstance  -- ^ The uri to make the request to
   -> Maybe ByteString -- ^ The file to upload to the Jenkins instance.
   -> Bartlett (Either BartlettError (Response ByteString)) -- ^ The response from the Jenkins instance.
-execRequest requestType reqOpts reqUrl postBody =
-  let stringUri = BU.uriToString reqUrl
-  in
+execRequest requestType reqOpts postBody = do
+    reqUrl <- asks jenkinsInstance
+
+    let stringUri = BU.uriToString reqUrl
+
     liftIO $ S.withAPISession $ \session ->
       case requestType of
         Post ->

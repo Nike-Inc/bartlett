@@ -12,14 +12,12 @@ module Bartlett.Actions.Info (
   getInfo
 ) where
 
-import           Bartlett.Network      (execRequest)
 import           Bartlett.Types
-import           Bartlett.Util         (mkUrl, toPrettyJson)
+import           Bartlett.Util         (mkUrl, toPrettyJson, withJenkins)
 
 import           Control.Lens          (set, (&), (^.))
-import           Control.Monad.Reader  (asks, liftIO)
+import           Control.Monad.Reader  (ask, liftIO)
 import qualified Data.ByteString.Char8 as BL
-import           Data.Maybe            (fromJust)
 import           Network.Wreq          (auth, defaults, responseBody)
 
 
@@ -29,18 +27,19 @@ import           Network.Wreq          (auth, defaults, responseBody)
 -- 'JenkinsInstance'. If not protocol is specified it will attempt to contact
 -- Jenkins over SSL.
 getInfo ::
-  BasicAuthUser b => Maybe b -- ^ The user to authenticate with.
-  -> [JobPath]               -- ^ The jobs to get information from.
+  [JobPath]               -- ^ The jobs to get information from.
   -> Bartlett (Either BartlettError ())
-getInfo user [] = return . Right $ ()
-getInfo user (path:paths) =
-  let reqOpts = defaults & set auth (getBasicAuth <$> user)
-  in do
-    jenkins <- fromJust <$> asks jenkinsInstance
-    response <- execRequest Get reqOpts (mkUrl jenkins path "/api/json") Nothing
-    case response of
-      Left e ->
-        return . Left $ e
-      Right resp -> do
-        liftIO $ BL.putStrLn . toPrettyJson $ resp ^. responseBody
-        getInfo user paths
+getInfo [] = return . Right $ ()
+getInfo (path:paths) = do
+    options <- ask
+    let reqOpts = defaults & set auth (getBasicAuth <$> user options)
+    let execRequest = requestExecutor options
+
+    withJenkins (mkUrl (jenkinsInstance options) path "/api/json") $ do
+      response <- execRequest Get reqOpts Nothing
+      case response of
+        Left e ->
+          return . Left $ e
+        Right resp -> do
+          liftIO $ BL.putStrLn . toPrettyJson $ resp ^. responseBody
+          getInfo paths
