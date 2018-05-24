@@ -1,5 +1,5 @@
 .PHONY: hlint_install, hlint, hlint_apply_refact, hlint_refactor
-.PHONY: stylish_haskell_install, stylish_haskell_check
+.PHONY: stylish_haskell_install, stylish_haskell_check, clean
 
 build: clean
 	@stack install

@@ -28,7 +28,11 @@ jenkins = do
 
 getCSRF :: IO W.Options
 getCSRF = do
-  j <- jenkins
+  j <- ReplSugar.jenkins
   S.withAPISession $ \session -> do
-    foo <- consCSRFHeader $ requestCSRFToken session usrOpts j
-    return $ W.defaults & foo
+    csrfCrumb <- requestCSRFToken session usrOpts j
+    case csrfCrumb of
+      Right c ->
+        return $ W.defaults & consCSRFHeader (crumbRequestField c, crumb c)
+      Left _ ->
+        return W.defaults

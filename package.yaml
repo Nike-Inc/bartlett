@@ -9,6 +9,9 @@ copyright: 2016-Present Nike, Inc.
 license: BSD3
 github: Nike-inc/bartlett
 
+extra-source-files:
+  - README.md
+
 # Global settings applied to all artifact types
 default-extensions:
   - OverloadedStrings
@@ -26,17 +29,6 @@ dependencies:
 
 library:
   source-dirs: src
-  exposed-modules:
-    - Bartlett.Types
-    - Bartlett.Util
-    - Bartlett.Parsers
-    - Bartlett.Network
-    - Bartlett.Configuration
-    - Bartlett.Actions.Info
-    - Bartlett.Actions.Build
-    - Bartlett.Actions.Config
-    - Bartlett.Actions.Artifact
-    - Bartlett.Actions.Log
   dependencies:
     - aeson
     - aeson-pretty
